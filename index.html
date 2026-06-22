@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PhishShield | Interactive Phishing Awareness Training</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div id="loader">
+        <div class="loader-circle"></div>
+        <h2>Loading PhishShield...</h2>
+    </div>
+
+    <div id="toast"></div>
+
+    <div id="progressContainer">
+        <div id="progressBar"></div>
+    </div>
+
+    <div id="particles"></div>
+
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-shield-halved"></i>
+            <h2>PhishShield</h2>
+        </div>
+        <nav>
+            <a href="#home">Home</a>
+            <a href="#about">About</a>
+            <a href="#types">Types</a>
+            <a href="#email">Email Lab</a>
+            <a href="#website">Website Detector</a>
+            <a href="#social">Social Engineering</a>
+            <a href="#timeline">Timeline</a>
+            <a href="#quiz">Quiz</a>
+        </nav>
+    </header>
+
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1>Protect Yourself From <span>Phishing Attacks</span></h1>
+            <p>
+                An Interactive Cybersecurity Awareness Platform. Learn how threat actors steal credentials,
+                recognize indicators of compromise (IoCs), and defend yourself against modern social engineering.
+            </p>
+            <button id="startTraining">Start Training</button>
+        </div>
+        <div class="hero-image">
+            <i class="fa-solid fa-user-secret hacker"></i>
+        </div>
+    </section>
+
+    <section class="stats">
+        <div class="card">
+            <h2 id="stat1">0</h2>
+            <p>Phishing Emails Sent Daily</p>
+        </div>
+        <div class="card">
+            <h2 id="stat2">0%</h2>
+            <p>Cyber Attacks Start with Email</p>
+        </div>
+        <div class="card">
+            <h2 id="stat3">$0M</h2>
+            <p>Lost Every Hour Worldwide</p>
+        </div>
+    </section>
+
+    <section id="about">
+        <h2>What is Phishing?</h2>
+        <p>
+            Phishing is a form of social engineering where attackers impersonate trusted organizations or 
+            legitimate individuals to trick victims into revealing sensitive corporate or personal data.
+        </p>
+        <div class="attack-flow">
+            <div>
+                <i class="fa-solid fa-envelope"></i>
+                <h3>Fake Email</h3>
+            </div>
+            <i class="fa-solid fa-arrow-right"></i>
+            <div>
+                <i class="fa-solid fa-link"></i>
+                <h3>Malicious Link</h3>
+            </div>
+            <i class="fa-solid fa-arrow-right"></i>
+            <div>
+                <i class="fa-solid fa-globe"></i>
+                <h3>Fake Website</h3>
+            </div>
+            <i class="fa-solid fa-arrow-right"></i>
+            <div>
+                <i class="fa-solid fa-user-lock"></i>
+                <h3>Data Stolen</h3>
+            </div>
+        </div>
+    </section>
+
+    <section id="types">
+        <h2>Vectors of Phishing</h2>
+        <div class="grid">
+            <div class="type-card">
+                <i class="fa-solid fa-envelope"></i>
+                <h3>Email Phishing</h3>
+                <p>Mass-scale, generic campaigns broadcasted to thousands of potential victims simultaneously.</p>
+            </div>
+            <div class="type-card">
+                <i class="fa-solid fa-user"></i>
+                <h3>Spear Phishing</h3>
+                <p>Highly targeted spear campaigns directed at specific personnel using personalized intelligence.</p>
+            </div>
+            <div class="type-card">
+                <i class="fa-solid fa-building"></i>
+                <h3>Whaling</h3>
+                <p>High-profile operations explicitly targeting executives, CEOs, or financial stakeholders.</p>
+            </div>
+            <div class="type-card">
+                <i class="fa-solid fa-phone"></i>
+                <h3>Vishing</h3>
+                <p>Voice-based social engineering conducted over telephone networks using spoofed caller IDs.</p>
+            </div>
+            <div class="type-card">
+                <i class="fa-solid fa-comment"></i>
+                <h3>Smishing</h3>
+                <p>SMS or text-based attacks exploiting mobile communication links and messaging channels.</p>
+            </div>
+            <div class="type-card">
+                <i class="fa-solid fa-wifi"></i>
+                <h3>Clone Phishing</h3>
+                <p>Modifying a previously delivered legitimate transmission to inject weaponized attachments/links.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="email">
+        <h2>Advanced Email Inspection Lab</h2>
+        <p>Analyze the email headers and body context below. Click on all 8 hidden indicators of compromise (IoCs).</p>
+        
+        <div class="mailClient">
+            <div class="mailTop">
+                <div>
+                    <strong>From:</strong>
+                    <span class="emailFlag" data-tip="Fake Domain Alert: Notice the zero '0' instead of an 'o' in micr0soft.">security@micr0soft-support.com</span>
+                </div>
+                <div>
+                    <strong>Reply-To:</strong>
+                    <span class="emailFlag" data-tip="Mismatch Flag: Reply-To routes to an external personal webmail address instead of an enterprise server.">verify@hotmail-security.net</span>
+                </div>
+            </div>
+            <hr>
+            <h3><i class="fa-solid fa-triangle-exclamation" style="color: #dc2626;"></i> Immediate Action Required</h3>
+            <div class="email-body-text">
+                <p>Dear <span class="emailFlag" data-tip="Generic Salutation: Legitimate organizations communicate with personalized account references.">Customer</span>,</p>
+                <p>We noticed unusual activities detected inside your infrastructure profile.</p>
+                <p>Failure to complete explicit verification processing within <span class="emailFlag" data-tip="Artificial Urgency: Forcing rapid action to mitigate psychological critical thinking.">12 hours</span> will result in permanent service execution suspension.</p>
+                <p>Please download the attached validation summary invoice ledger documentation:</p>
+                <p>📎 <span class="emailFlag" data-tip="Malicious Executable Extension: Double extension hides an executable payload file type (.exe).">Invoice.pdf.exe</span></p>
+                <p>Select the portal shortcut to update account authorization flags:</p>
+                <p><span class="emailFlag" data-tip="Deceptive Display URL: The link target domain is untrusted and matches malicious server signatures.">https://microsoft-login-security.xyz</span></p>
+                <p>If you fail to verify immediately, <span class="emailFlag" data-tip="Coercive Threat/Fear Tactic: High-consequence threats are used to force obedience.">your account database assets will be deleted forever.</span></p>
+                <hr>
+                <p>Regards,<br><span class="emailFlag" data-tip="Missing Clear Contact Data: Lacks professional contact numbers, regulatory headers, or valid enterprise signatures.">Microsoft Security Team</span></p>
+            </div>
+        </div>
+        <h3 id="emailLabScore">0 / 8 Indicators Found</h3>
+    </section>
+
+    <section id="website">
+        <h2>Website Detection Challenge</h2>
+        <p>Compare the operational login views. Analyze and click the 3 suspicious items located within the fake interface card.</p>
+        
+        <div class="websiteContainer">
+            <div class="loginCard legit">
+                <h3><i class="fa-solid fa-circle-check" style="color: #16a34a;"></i> Authentic Microsoft Service</h3>
+                <p class="url goodURL">https://login.microsoftonline.com</p>
+                <input type="email" placeholder="Email, phone, or Skype" disabled>
+                <input type="password" placeholder="Password" disabled>
+                <button style="background: #0078d4;">Next</button>
+            </div>
+            
+            <div class="loginCard fake">
+                <h3><i class="fa-solid fa-triangle-exclamation" style="color: #dc2626;"></i> Target Simulation Portal</h3>
+                <p class="url fakeFlag" data-tip="Domain Discrepancy: This is an unverified external third-party registrar URL.">https://microsoft-login-security.xyz</p>
+                <input type="email" placeholder="Microsoft Email" disabled>
+                <input type="password" placeholder="Password" disabled>
+                <button class="fakeFlag" data-tip="Coercive Form Labeling: Actions like 'Verify Account' replace basic login operations to create pressure.">Verify Account</button>
+                <small class="fakeFlag" data-tip="Misleading Trust Indicator: SSL Certificates encrypt traffic but do not validate user intent or legitimacy.">🔒 Secure Connection Certified</small>
+            </div>
+        </div>
+        <h3 id="websiteScore">Fake Website Indicators Found : 0 / 3</h3>
+    </section>
+
+    <section id="social">
+        <h2>Psychological Exploitation Paradigms</h2>
+        <p>Click on each threat card to map the psychological core vectors used across phishing frameworks.</p>
+        <div class="grid">
+            <div class="social-card">Fear</div>
+            <div class="social-card">Urgency</div>
+            <div class="social-card">Authority</div>
+            <div class="social-card">Curiosity</div>
+            <div class="social-card">Reward</div>
+            <div class="social-card">Scarcity</div>
+        </div>
+    </section>
+
+    <section id="timeline">
+        <h2>Phishing Lifecycle Mechanics</h2>
+        <p>Deconstruct the typical execution timeline of a multi-stage corporate credential harvesting sequence.</p>
+        <div class="timeline">
+            <div class="timelineItem">
+                <div class="circle">1</div>
+                <div class="content">
+                    <h3>Payload Generation</h3>
+                    <p>The malicious actor stands up infrastructure and crafts social engineering lures designed to bypass mail filters.</p>
+                </div>
+            </div>
+            <div class="timelineItem">
+                <div class="circle">2</div>
+                <div class="content">
+                    <h3>Inbound Vector Access</h3>
+                    <p>The malicious message enters internal endpoints and lands directly inside the target inbox.</p>
+                </div>
+            </div>
+            <div class="timelineItem">
+                <div class="circle">3</div>
+                <div class="content">
+                    <h3>Lure Interaction</h3>
+                    <p>The operator interacts with structural email fields and clicks the hyperlinked redirect URL.</p>
+                </div>
+            </div>
+            <div class="timelineItem">
+                <div class="circle">4</div>
+                <div class="content">
+                    <h3>Phishing Portal Landing</h3>
+                    <p>The client endpoint opens a spoofed landing page mimicking a legitimate authentication server.</p>
+                </div>
+            </div>
+            <div class="timelineItem">
+                <div class="circle">5</div>
+                <div class="content">
+                    <h3>Credential Exfiltration</h3>
+                    <p>The target keys in usernames, passwords, or multi-factor tokens, streaming plain text logs straight to the threat server.</p>
+                </div>
+            </div>
+            <div class="timelineItem">
+                <div class="circle">6</div>
+                <div class="content">
+                    <h3>Infrastructure Compromise</h3>
+                    <p>The adversary leverages stolen session parameters or data points to gain persistent network access.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="quiz">
+        <h2>Assessment Readiness Review</h2>
+        <p>Validate your knowledge against corporate compliance standards to generate your certificate of completion.</p>
+        <button id="startQuiz">Launch Interactive Quiz</button>
+    </section>
+
+    <footer>
+        <h3>PhishShield Portal System</h3>
+        <p>Engineered for Enterprise Cybersecurity Incident Training Evaluation.</p>
+    </footer>
+
+    <div id="quizModal" class="modal">
+        <div class="modal-content">
+            <span class="closeQuiz">&times;</span>
+            <h2>Cyber Awareness Evaluation</h2>
+            <div id="quizContainer">
+                <p id="question">Question placeholder text.</p>
+                <div id="answers"></div>
+                <button id="nextQuestion">Advance Question</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="certificateModal" class="modal">
+        <div class="modal-content">
+            <h2>🎉 Certification Verification Achieved</h2>
+            <p>You have demonstrated comprehensive awareness capability against technical social engineering tactics.</p>
+            <input type="text" id="username" placeholder="Enter Full Professional Name">
+            <button id="generateCertificate">Generate Secure Document</button>
+        </div>
+    </div>
+
+    <audio id="clickSound"><source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav"></audio>
+    <audio id="successSound"><source src="https://assets.mixkit.co/active_storage/sfx/1435/1435-84.wav"></audio>
+    <audio id="errorSound"><source src="https://assets.mixkit.co/active_storage/sfx/2573/2573-84.wav"></audio>
+
+    <script src="script.js"></script>
+    <script src="quiz.js"></script>
+    <script src="certificate.js"></script>
+</body>
+</html>
