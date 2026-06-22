@@ -1,8 +1,7 @@
 /* ==========================================================================
-   PHISHSHIELD DRIVER ENGINE - UPGRADED ENTERPRISE PLATFORM CONFIGURATION
+   PHISHSHIELD DRIVER ENGINE - ENTERPRISE PLATFORM CONFIGURATION
    ========================================================================== */
 document.addEventListener("DOMContentLoaded", () => {
-    // Phase Out Loader Screen
     const loader = document.getElementById("loader");
     if(loader) {
         setTimeout(() => {
@@ -11,15 +10,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 800);
     }
 
-    // Fire UI Lifecycle Modules
     initTelemetryCounters();
     initScrollTracking();
     initInteractiveLab();
     initWebsiteChallenge();
     initSocialTactics();
-    initUpgradeModules(); // Starts new interactive handlers
+    initUpgradeModules();
 
-    // Attach Hero Navigation Trigger
     const startBtn = document.getElementById("startTraining");
     if(startBtn) {
         startBtn.addEventListener("click", () => {
@@ -28,7 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-/* TELEMETRY ENGINE - ANIMATED DASHBOARD LOGS */
 function initTelemetryCounters() {
     const runCounter = (id, target, duration) => {
         const el = document.getElementById(id);
@@ -50,7 +46,6 @@ function initTelemetryCounters() {
     runCounter("stat3", 17, 1500); 
 }
 
-/* WINDOW POSITION EVALUATION - SCROLL PROGRESS OVERLAY */
 function initScrollTracking() {
     window.addEventListener("scroll", () => {
         const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
@@ -78,20 +73,17 @@ function initScrollTracking() {
     });
 }
 
-/* INTERACTIVE LAB ONE - TECHNICAL EMAIL INSIGHTS WITH LOCALSTORAGE */
 function initInteractiveLab() {
     const totalFlags = 8;
     let flagsDiscovered = parseInt(localStorage.getItem("ps_email_flags")) || 0;
     const scoreboard = document.getElementById("emailLabScore");
     const targets = document.querySelectorAll(".emailFlag");
 
-    // Re-hydrate stored UI state if user returns later
     if(flagsDiscovered > 0 && scoreboard) {
         scoreboard.innerText = `${flagsDiscovered} / ${totalFlags} Indicators Found`;
     }
 
     targets.forEach((target, index) => {
-        // If flag list matches stored count, or check identifier strings
         if(localStorage.getItem(`ps_email_flag_${index}`) === "found") {
             target.classList.add("flagged-IoC");
             target.style.background = "#10b981";
@@ -125,7 +117,6 @@ function initInteractiveLab() {
     });
 }
 
-/* INTERACTIVE LAB TWO - SPOOFED INTERFACE CHALLENGE WITH LOCALSTORAGE */
 function initWebsiteChallenge() {
     const totalIndicators = 3;
     let indicatorsDiscovered = parseInt(localStorage.getItem("ps_web_indicators")) || 0;
@@ -168,7 +159,6 @@ function initWebsiteChallenge() {
     });
 }
 
-/* PARSING COMPONENT - PSYCHOLOGICAL EXPLOITATION OVERVIEW */
 function initSocialTactics() {
     const cards = document.querySelectorAll(".social-card");
     cards.forEach(card => {
@@ -188,11 +178,7 @@ function initSocialTactics() {
     });
 }
 
-/* ==========================================================================
-   UPGRADE ENGINE INTERFACES - SAFE INTERCEPTION & SYSTEM FORENSICS
-   ========================================================================== */
 function initUpgradeModules() {
-    // 1. Raw Mail Header Toggle Control
     const toggleBtn = document.getElementById("toggleHeadersBtn");
     const headersPanel = document.getElementById("rawHeadersBox");
 
@@ -209,26 +195,22 @@ function initUpgradeModules() {
         });
     }
 
-    // 2. Interactive Input Safe Submission Interceptor
     const simForm = document.getElementById("simulatorLoginForm");
     const interceptModal = document.getElementById("exploitInterceptModal");
     const closeInterceptBtn = document.getElementById("closeInterceptBtn");
 
     if(simForm && interceptModal) {
         simForm.addEventListener("submit", (e) => {
-            e.preventDefault(); // HALT actual validation execution or page refresh
+            e.preventDefault();
             
             const emailInput = document.getElementById("simEmail").value;
             const passInput = document.getElementById("simPassword").value;
 
-            // Populate visual forensic logging array boxes safely inside modal
             document.getElementById("interceptedUser").innerText = emailInput;
             document.getElementById("interceptedPass").innerText = "*".repeat(passInput.length) + ` (${passInput.substring(0,2)}... Masked Security Log)`;
 
             playFeedbackSound("errorSound");
             interceptModal.style.display = "flex";
-
-            // Clean input layout strings out safely
             simForm.reset();
         });
     }
@@ -241,7 +223,6 @@ function initUpgradeModules() {
     }
 }
 
-/* COMPLIANCE ENGINE AUDIO & NOTIFICATION HELPER FUNCTIONS */
 function triggerToastNotification(msg) {
     const toast = document.getElementById("toast");
     if(!toast) return;
@@ -258,6 +239,6 @@ function playFeedbackSound(id) {
     const sound = document.getElementById(id);
     if(sound) {
         sound.currentTime = 0;
-        sound.play().catch(() => {/* Mute browser audio restriction block */});
+        sound.play().catch(() => {});
     }
 }
