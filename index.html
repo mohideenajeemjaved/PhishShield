@@ -12,7 +12,7 @@
 
     <div id="loader">
         <div class="loader-circle"></div>
-        <h2>Loading PhishShield...</h2>
+        <h2>Loading PhishShield Engine...</h2>
     </div>
 
     <div id="toast"></div>
@@ -138,6 +138,23 @@
         <h2>Advanced Email Inspection Lab</h2>
         <p>Analyze the email headers and body context below. Click on all 8 hidden indicators of compromise (IoCs).</p>
         
+        <div style="text-align: center; margin-bottom: 20px;">
+            <button id="toggleHeadersBtn" class="secondary-btn"><i class="fa-solid fa-code"></i> Inspect Raw Technical Mail Headers</button>
+        </div>
+
+        <div id="rawHeadersBox" class="raw-headers-panel" style="display: none;">
+            <h4><i class="fa-solid fa-terminal"></i> Forensic Mail Header Analysis (SIEM Log View)</h4>
+            <pre>
+Delivered-To: victim@enterprise-corp.com
+Received: from mail-server.micr0soft-support.com (unverified-host [185.220.101.5])
+From: "Microsoft Security Operations" &lt;security@micr0soft-support.com&gt;
+<span class="header-ioc-highlight" title="SPF Failure: The sending IP is not authorized by Microsoft's authentic SPF configuration database records.">Authentication-Results: spf=fail (sender IP is 185.220.101.5)</span>
+<span class="header-ioc-highlight" title="DKIM Failure: Cryptographic signature verification failed. Message body was altered or forged during transport.">DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=micr0soft-support.com; s=selector1; h=From:To:Subject; bh=FAIL...</span>
+<span class="header-ioc-highlight" title="DMARC Reject Policy Triggered: High-risk mismatch isolated by domain infrastructure monitoring policies.">DMARC-Filter: OpenDMARC Filter v1.4.2 action=reject policy=none</span>
+X-Mailer: MassMailExploitTool v4.2
+            </pre>
+        </div>
+
         <div class="mailClient">
             <div class="mailTop">
                 <div>
@@ -177,20 +194,43 @@
                 <p class="url goodURL">https://login.microsoftonline.com</p>
                 <input type="email" placeholder="Email, phone, or Skype" disabled>
                 <input type="password" placeholder="Password" disabled>
-                <button style="background: #0078d4;">Next</button>
+                <button style="background: #0078d4; cursor: not-allowed;">Next</button>
             </div>
             
             <div class="loginCard fake">
                 <h3><i class="fa-solid fa-triangle-exclamation" style="color: #dc2626;"></i> Target Simulation Portal</h3>
                 <p class="url fakeFlag" data-tip="Domain Discrepancy: This is an unverified external third-party registrar URL.">https://microsoft-login-security.xyz</p>
-                <input type="email" placeholder="Microsoft Email" disabled>
-                <input type="password" placeholder="Password" disabled>
-                <button class="fakeFlag" data-tip="Coercive Form Labeling: Actions like 'Verify Account' replace basic login operations to create pressure.">Verify Account</button>
+                
+                <!-- UPGRADE: Inputs enabled for interactive execution testing simulation -->
+                <form id="simulatorLoginForm">
+                    <input type="email" id="simEmail" placeholder="Enter Microsoft Email Account" required style="margin-bottom: 12px;">
+                    <input type="password" id="simPassword" placeholder="Enter Password" required style="margin-bottom: 12px;">
+                    <button type="submit" class="fakeFlag" data-tip="Coercive Form Labeling: Actions like 'Verify Account' replace basic login operations to create pressure.">Verify Account</button>
+                </form>
+                
                 <small class="fakeFlag" data-tip="Misleading Trust Indicator: SSL Certificates encrypt traffic but do not validate user intent or legitimacy.">🔒 Secure Connection Certified</small>
             </div>
         </div>
         <h3 id="websiteScore">Fake Website Indicators Found : 0 / 3</h3>
     </section>
+
+    <!-- EXPLOITATION RADAR ALERT DIALOG (SAFE BOX INTERACTION) -->
+    <div id="exploitInterceptModal" class="modal">
+        <div class="modal-content" style="border-color: #dc2626; box-shadow: 0 0 40px rgba(220, 38, 38, 0.4);">
+            <h2 style="color: #dc2626;"><i class="fa-solid fa-hand-holding-skull"></i> DATA EXFILTRATION BLOCKED</h2>
+            <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
+            <p style="color: #ffffff; line-height: 26px;">
+                <strong>Security Analysis:</strong> You just hit submit on a malicious domain! If this wasn't a sandbox, your credentials would have been transmitted in <strong>plain-text logs</strong> directly to the adversary's Command-and-Control (C2) infrastructure.
+            </p>
+            <div style="background: rgba(220, 38, 38, 0.1); border-left: 4px solid #dc2626; padding: 15px; margin: 15px 0; font-family: monospace; font-size: 14px; color: #fca5a5;">
+                [OUTBOUND LOG DATA TRACKED INTERCEPTED]:<br>
+                Identity Node: <span id="interceptedUser">---</span><br>
+                Payload String: <span id="interceptedPass">---</span><br>
+                Target Exfil Server: https://microsoft-login-security.xyz/log.php
+            </div>
+            <button id="closeInterceptBtn" style="background: #dc2626; color: #ffffff; margin-top: 10px;">Acknowledge and Close Vector</button>
+        </div>
+    </div>
 
     <section id="social">
         <h2>Psychological Exploitation Paradigms</h2>
