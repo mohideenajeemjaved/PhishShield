@@ -1,7 +1,6 @@
 /* ==========================================================================
-   PHISHSHIELD DRIVER ENGINE - INTEGRATED PLATFORM CONFIGURATION
+   PHISHSHIELD DRIVER ENGINE - UPGRADED ENTERPRISE PLATFORM CONFIGURATION
    ========================================================================== */
-
 document.addEventListener("DOMContentLoaded", () => {
     // Phase Out Loader Screen
     const loader = document.getElementById("loader");
@@ -18,6 +17,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initInteractiveLab();
     initWebsiteChallenge();
     initSocialTactics();
+    initUpgradeModules(); // Starts new interactive handlers
 
     // Attach Hero Navigation Trigger
     const startBtn = document.getElementById("startTraining");
@@ -45,9 +45,9 @@ function initTelemetryCounters() {
         }, stepTime || 15);
     };
 
-    runCounter("stat1", 34, 1500); // Maps visually to 3.4B
-    runCounter("stat2", 90, 1500); // Maps visually to 90%
-    runCounter("stat3", 17, 1500); // Maps visually to $17M
+    runCounter("stat1", 34, 1500); 
+    runCounter("stat2", 90, 1500); 
+    runCounter("stat3", 17, 1500); 
 }
 
 /* WINDOW POSITION EVALUATION - SCROLL PROGRESS OVERLAY */
@@ -60,7 +60,6 @@ function initScrollTracking() {
         if(progressBar) progressBar.style.width = scrolled + "%";
     });
 
-    // Content Animation Sequence using Intersection Observer
     const sections = document.querySelectorAll("section");
     const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -79,19 +78,35 @@ function initScrollTracking() {
     });
 }
 
-/* INTERACTIVE LAB ONE - TECHNICAL EMAIL INSIGHTS */
+/* INTERACTIVE LAB ONE - TECHNICAL EMAIL INSIGHTS WITH LOCALSTORAGE */
 function initInteractiveLab() {
-    let flagsDiscovered = 0;
     const totalFlags = 8;
-    const targets = document.querySelectorAll(".emailFlag");
+    let flagsDiscovered = parseInt(localStorage.getItem("ps_email_flags")) || 0;
     const scoreboard = document.getElementById("emailLabScore");
+    const targets = document.querySelectorAll(".emailFlag");
 
-    targets.forEach(target => {
+    // Re-hydrate stored UI state if user returns later
+    if(flagsDiscovered > 0 && scoreboard) {
+        scoreboard.innerText = `${flagsDiscovered} / ${totalFlags} Indicators Found`;
+    }
+
+    targets.forEach((target, index) => {
+        // If flag list matches stored count, or check identifier strings
+        if(localStorage.getItem(`ps_email_flag_${index}`) === "found") {
+            target.classList.add("flagged-IoC");
+            target.style.background = "#10b981";
+            target.style.color = "#ffffff";
+            target.style.borderBottom = "2px solid #047857";
+        }
+
         target.addEventListener("click", () => {
             if(target.classList.contains("flagged-IoC")) return;
             
             target.classList.add("flagged-IoC");
             flagsDiscovered++;
+            localStorage.setItem("ps_email_flags", flagsDiscovered);
+            localStorage.setItem(`ps_email_flag_${index}`, "found");
+            
             target.style.background = "#10b981";
             target.style.color = "#ffffff";
             target.style.borderBottom = "2px solid #047857";
@@ -110,19 +125,32 @@ function initInteractiveLab() {
     });
 }
 
-/* INTERACTIVE LAB TWO - SPOOFED INTERFACE CHALLENGE */
+/* INTERACTIVE LAB TWO - SPOOFED INTERFACE CHALLENGE WITH LOCALSTORAGE */
 function initWebsiteChallenge() {
-    let indicatorsDiscovered = 0;
     const totalIndicators = 3;
-    const items = document.querySelectorAll(".fakeFlag");
+    let indicatorsDiscovered = parseInt(localStorage.getItem("ps_web_indicators")) || 0;
     const displayScore = document.getElementById("websiteScore");
+    const items = document.querySelectorAll(".fakeFlag");
 
-    items.forEach(item => {
+    if(indicatorsDiscovered > 0 && displayScore) {
+        displayScore.innerText = `Fake Website Indicators Found : ${indicatorsDiscovered} / ${totalIndicators}`;
+    }
+
+    items.forEach((item, index) => {
+        if(localStorage.getItem(`ps_web_flag_${index}`) === "found") {
+            item.classList.add("analyzed-IoC");
+            item.style.background = "#10b981";
+            item.style.color = "#ffffff";
+        }
+
         item.addEventListener("click", () => {
             if(item.classList.contains("analyzed-IoC")) return;
 
             item.classList.add("analyzed-IoC");
             indicatorsDiscovered++;
+            localStorage.setItem("ps_web_indicators", indicatorsDiscovered);
+            localStorage.setItem(`ps_web_flag_${index}`, "found");
+            
             item.style.background = "#10b981";
             item.style.color = "#ffffff";
             
@@ -158,6 +186,59 @@ function initSocialTactics() {
             alert(`Vector Mapping: [${vector}]\n\nTactical Context: ${definitions[vector] || ""}`);
         });
     });
+}
+
+/* ==========================================================================
+   UPGRADE ENGINE INTERFACES - SAFE INTERCEPTION & SYSTEM FORENSICS
+   ========================================================================== */
+function initUpgradeModules() {
+    // 1. Raw Mail Header Toggle Control
+    const toggleBtn = document.getElementById("toggleHeadersBtn");
+    const headersPanel = document.getElementById("rawHeadersBox");
+
+    if(toggleBtn && headersPanel) {
+        toggleBtn.addEventListener("click", () => {
+            playFeedbackSound("clickSound");
+            if(headersPanel.style.display === "none") {
+                headersPanel.style.display = "block";
+                toggleBtn.innerHTML = `<i class="fa-solid fa-folder-open"></i> Hide Raw Technical Mail Headers`;
+            } else {
+                headersPanel.style.display = "none";
+                toggleBtn.innerHTML = `<i class="fa-solid fa-code"></i> Inspect Raw Technical Mail Headers`;
+            }
+        });
+    }
+
+    // 2. Interactive Input Safe Submission Interceptor
+    const simForm = document.getElementById("simulatorLoginForm");
+    const interceptModal = document.getElementById("exploitInterceptModal");
+    const closeInterceptBtn = document.getElementById("closeInterceptBtn");
+
+    if(simForm && interceptModal) {
+        simForm.addEventListener("submit", (e) => {
+            e.preventDefault(); // HALT actual validation execution or page refresh
+            
+            const emailInput = document.getElementById("simEmail").value;
+            const passInput = document.getElementById("simPassword").value;
+
+            // Populate visual forensic logging array boxes safely inside modal
+            document.getElementById("interceptedUser").innerText = emailInput;
+            document.getElementById("interceptedPass").innerText = "*".repeat(passInput.length) + ` (${passInput.substring(0,2)}... Masked Security Log)`;
+
+            playFeedbackSound("errorSound");
+            interceptModal.style.display = "flex";
+
+            // Clean input layout strings out safely
+            simForm.reset();
+        });
+    }
+
+    if(closeInterceptBtn && interceptModal) {
+        closeInterceptBtn.addEventListener("click", () => {
+            playFeedbackSound("clickSound");
+            interceptModal.style.display = "none";
+        });
+    }
 }
 
 /* COMPLIANCE ENGINE AUDIO & NOTIFICATION HELPER FUNCTIONS */
