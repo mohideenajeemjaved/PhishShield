@@ -194,18 +194,17 @@ X-Mailer: MassMailExploitTool v4.2
                 <p class="url goodURL">https://login.microsoftonline.com</p>
                 <input type="email" placeholder="Email, phone, or Skype" disabled>
                 <input type="password" placeholder="Password" disabled>
-                <button style="background: #0078d4; cursor: not-allowed;">Next</button>
+                <button style="background: #0078d4; width: 100%;">Next</button>
             </div>
             
             <div class="loginCard fake">
                 <h3><i class="fa-solid fa-triangle-exclamation" style="color: #dc2626;"></i> Target Simulation Portal</h3>
                 <p class="url fakeFlag" data-tip="Domain Discrepancy: This is an unverified external third-party registrar URL.">https://microsoft-login-security.xyz</p>
                 
-                <!-- UPGRADE: Inputs enabled for interactive execution testing simulation -->
-                <form id="simulatorLoginForm">
-                    <input type="email" id="simEmail" placeholder="Enter Microsoft Email Account" required style="margin-bottom: 12px;">
-                    <input type="password" id="simPassword" placeholder="Enter Password" required style="margin-bottom: 12px;">
-                    <button type="submit" class="fakeFlag" data-tip="Coercive Form Labeling: Actions like 'Verify Account' replace basic login operations to create pressure.">Verify Account</button>
+                <form id="simulatorLoginForm" class="sim-form-layout">
+                    <input type="email" id="simEmail" placeholder="Enter Microsoft Email Account" required>
+                    <input type="password" id="simPassword" placeholder="Enter Password" required>
+                    <button type="submit" class="fakeFlag action-btn" data-tip="Coercive Form Labeling: Actions like 'Verify Account' replace basic login operations to create pressure.">Verify Account</button>
                 </form>
                 
                 <small class="fakeFlag" data-tip="Misleading Trust Indicator: SSL Certificates encrypt traffic but do not validate user intent or legitimacy.">🔒 Secure Connection Certified</small>
@@ -214,7 +213,6 @@ X-Mailer: MassMailExploitTool v4.2
         <h3 id="websiteScore">Fake Website Indicators Found : 0 / 3</h3>
     </section>
 
-    <!-- EXPLOITATION RADAR ALERT DIALOG (SAFE BOX INTERACTION) -->
     <div id="exploitInterceptModal" class="modal">
         <div class="modal-content" style="border-color: #dc2626; box-shadow: 0 0 40px rgba(220, 38, 38, 0.4);">
             <h2 style="color: #dc2626;"><i class="fa-solid fa-hand-holding-skull"></i> DATA EXFILTRATION BLOCKED</h2>
@@ -222,13 +220,13 @@ X-Mailer: MassMailExploitTool v4.2
             <p style="color: #ffffff; line-height: 26px;">
                 <strong>Security Analysis:</strong> You just hit submit on a malicious domain! If this wasn't a sandbox, your credentials would have been transmitted in <strong>plain-text logs</strong> directly to the adversary's Command-and-Control (C2) infrastructure.
             </p>
-            <div style="background: rgba(220, 38, 38, 0.1); border-left: 4px solid #dc2626; padding: 15px; margin: 15px 0; font-family: monospace; font-size: 14px; color: #fca5a5;">
+            <div style="background: rgba(220, 38, 38, 0.1); border-left: 4px solid #dc2626; padding: 15px; margin: 15px 0; font-family: monospace; font-size: 14px; color: #fca5a5; text-align: left;">
                 [OUTBOUND LOG DATA TRACKED INTERCEPTED]:<br>
                 Identity Node: <span id="interceptedUser">---</span><br>
                 Payload String: <span id="interceptedPass">---</span><br>
                 Target Exfil Server: https://microsoft-login-security.xyz/log.php
             </div>
-            <button id="closeInterceptBtn" style="background: #dc2626; color: #ffffff; margin-top: 10px;">Acknowledge and Close Vector</button>
+            <button id="closeInterceptBtn" style="background: #dc2626; color: #ffffff; margin-top: 10px; width: 100%;">Acknowledge and Close Vector</button>
         </div>
     </div>
 
