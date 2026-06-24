@@ -1,335 +1,1332 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PhishShield | Interactive Phishing Awareness Training</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PhishShield | Interactive Phishing Awareness Training</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181c24;
+    --border: rgba(255,255,255,0.07);
+    --accent: #00e5ff;
+    --accent2: #7c3aed;
+    --danger: #ff3b5c;
+    --success: #00d68f;
+    --warn: #ffb800;
+    --text: #e8eaf0;
+    --muted: #7a8099;
+    --glow: 0 0 24px rgba(0,229,255,0.18);
+    --glow-danger: 0 0 24px rgba(255,59,92,0.22);
+    --radius: 14px;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    line-height: 1.65;
+    overflow-x: hidden;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--accent2); border-radius: 3px; }
+
+  /* ── LOADER ── */
+  #loader {
+    position: fixed; inset: 0; z-index: 9999;
+    background: var(--bg);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 20px;
+    transition: opacity .5s ease, visibility .5s ease;
+  }
+  #loader.hide { opacity: 0; visibility: hidden; }
+  .loader-ring {
+    width: 60px; height: 60px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  #loader h2 { font-family: var(--font-mono); font-size: 14px; color: var(--accent); letter-spacing: 2px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── PROGRESS BAR ── */
+  #progressBar {
+    position: fixed; top: 0; left: 0; z-index: 999;
+    height: 3px; width: 0%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width .2s ease;
+  }
+
+  /* ── TOAST ── */
+  #toastContainer {
+    position: fixed; bottom: 28px; right: 28px; z-index: 9998;
+    display: flex; flex-direction: column; gap: 12px;
+    pointer-events: none;
+  }
+  .toast {
+    display: flex; align-items: center; gap: 14px;
+    padding: 16px 22px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: var(--radius);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+    font-size: 14px; font-weight: 500;
+    min-width: 280px; max-width: 380px;
+    animation: slideIn .35s cubic-bezier(.22,1,.36,1) forwards;
+    pointer-events: all;
+  }
+  .toast.danger { border-left-color: var(--danger); }
+  .toast.success { border-left-color: var(--success); }
+  .toast.warn { border-left-color: var(--warn); }
+  .toast .toast-icon { font-size: 18px; flex-shrink: 0; }
+  .toast.danger .toast-icon { color: var(--danger); }
+  .toast.success .toast-icon { color: var(--success); }
+  .toast.warn .toast-icon { color: var(--warn); }
+  .toast.fade-out { animation: slideOut .3s ease forwards; }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(60px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  @keyframes slideOut {
+    to { opacity: 0; transform: translateX(60px); }
+  }
+
+  /* ── PARTICLES ── */
+  #particles { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+  .particle {
+    position: absolute; width: 2px; height: 2px;
+    background: var(--accent); border-radius: 50%;
+    opacity: 0; animation: float linear infinite;
+  }
+  @keyframes float {
+    0% { opacity: 0; transform: translateY(0) scale(0); }
+    10% { opacity: .7; }
+    90% { opacity: .3; }
+    100% { opacity: 0; transform: translateY(-120vh) scale(1.5); }
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: sticky; top: 0; z-index: 800;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 40px; height: 64px;
+    background: rgba(10,12,16,.85);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo i { color: var(--accent); font-size: 22px; }
+  .logo h2 { font-family: var(--font-display); font-size: 20px; font-weight: 800; letter-spacing: -0.5px; color: #fff; }
+  nav { display: flex; gap: 4px; flex-wrap: wrap; }
+  nav a {
+    color: var(--muted); font-size: 13px; font-weight: 500;
+    text-decoration: none; padding: 6px 12px; border-radius: 8px;
+    transition: color .2s, background .2s;
+  }
+  nav a:hover { color: var(--accent); background: rgba(0,229,255,0.07); }
+
+  /* ── HERO ── */
+  #home {
+    position: relative; z-index: 1;
+    min-height: 92vh; display: flex; align-items: center; justify-content: center;
+    padding: 80px 40px;
+    overflow: hidden;
+  }
+  .hero-content { max-width: 680px; }
+  .hero-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,229,255,.08); border: 1px solid rgba(0,229,255,.2);
+    color: var(--accent); font-size: 12px; font-weight: 600;
+    letter-spacing: 2px; text-transform: uppercase;
+    padding: 6px 14px; border-radius: 100px;
+    margin-bottom: 28px;
+  }
+  .hero-content h1 {
+    font-family: var(--font-display); font-size: clamp(2.4rem,5vw,4rem);
+    font-weight: 800; line-height: 1.1; letter-spacing: -1.5px; color: #fff;
+    margin-bottom: 20px;
+  }
+  .hero-content h1 span {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .hero-content p { color: var(--muted); font-size: 17px; max-width: 520px; margin-bottom: 36px; }
+  .hero-btns { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #00b8d4);
+    color: #000; font-weight: 700; font-size: 15px;
+    padding: 14px 30px; border: none; border-radius: 10px;
+    cursor: pointer; transition: transform .2s, box-shadow .2s;
+    box-shadow: 0 0 20px rgba(0,229,255,.25);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 0 36px rgba(0,229,255,.4); }
+  .btn-ghost {
+    background: transparent; color: var(--text); font-weight: 600; font-size: 15px;
+    padding: 14px 30px; border: 1px solid var(--border); border-radius: 10px;
+    cursor: pointer; transition: border-color .2s, color .2s;
+  }
+  .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+  .hero-badge {
+    position: absolute; right: 8%; top: 50%; transform: translateY(-50%);
+    width: 260px; height: 260px;
+    background: radial-gradient(circle at 40% 40%, rgba(0,229,255,.12), transparent 70%),
+                var(--surface2);
+    border: 1px solid var(--border); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    animation: pulse 4s ease-in-out infinite;
+  }
+  .hero-badge i { font-size: 100px; color: var(--accent); opacity: .6; }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(0,229,255,.15); }
+    50%      { box-shadow: 0 0 60px 20px rgba(0,229,255,.08); }
+  }
+
+  /* ── STATS ── */
+  .stats {
+    position: relative; z-index: 1;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+    gap: 1px; background: var(--border);
+    border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  }
+  .stats .card {
+    background: var(--surface); padding: 36px 32px; text-align: center;
+  }
+  .stats .card h2 {
+    font-family: var(--font-display); font-size: 2.6rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 6px;
+  }
+  .stats .card p { color: var(--muted); font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+
+  /* ── SECTIONS ── */
+  section:not(.stats):not(#home) {
+    position: relative; z-index: 1;
+    padding: 80px 40px; max-width: 1100px; margin: 0 auto;
+  }
+  .section-label {
+    font-family: var(--font-mono); font-size: 11px; color: var(--accent);
+    letter-spacing: 3px; text-transform: uppercase; margin-bottom: 12px;
+    display: block;
+  }
+  section h2 {
+    font-family: var(--font-display); font-size: clamp(1.8rem,3vw,2.6rem);
+    font-weight: 800; color: #fff; margin-bottom: 12px; letter-spacing: -1px;
+  }
+  section > p { color: var(--muted); max-width: 640px; margin-bottom: 40px; font-size: 15px; }
+
+  /* ── ABOUT ── */
+  .attack-flow {
+    display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-top: 32px;
+  }
+  .attack-flow > div {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px 28px; text-align: center;
+    flex: 1; min-width: 120px; transition: border-color .3s, transform .2s;
+  }
+  .attack-flow > div:hover { border-color: var(--accent); transform: translateY(-4px); }
+  .attack-flow > div i { font-size: 28px; color: var(--accent); margin-bottom: 10px; display: block; }
+  .attack-flow > div h3 { font-size: 13px; font-weight: 600; color: var(--text); }
+  .attack-flow > i { color: var(--muted); font-size: 18px; }
+
+  /* ── TYPES GRID ── */
+  .grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 20px;
+  }
+  .type-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px 24px;
+    transition: border-color .3s, transform .2s, box-shadow .3s;
+    cursor: default;
+  }
+  .type-card:hover {
+    border-color: rgba(0,229,255,.3);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(0,0,0,.4);
+  }
+  .type-card i { font-size: 26px; color: var(--accent); margin-bottom: 16px; display: block; }
+  .type-card h3 { font-family: var(--font-display); font-size: 16px; font-weight: 700; margin-bottom: 8px; color: #fff; }
+  .type-card p { font-size: 13px; color: var(--muted); }
+
+  /* ── EMAIL LAB ── */
+  .secondary-btn {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted); padding: 10px 20px; border-radius: 8px;
+    cursor: pointer; font-size: 13px; font-weight: 500;
+    transition: border-color .2s, color .2s;
+  }
+  .secondary-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .raw-headers-panel {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; margin-bottom: 28px;
+  }
+  .raw-headers-panel h4 { font-family: var(--font-mono); font-size: 12px; color: var(--accent); margin-bottom: 16px; letter-spacing: 1px; }
+  .raw-headers-panel pre { font-family: var(--font-mono); font-size: 12px; color: #b0b8d0; line-height: 1.8; white-space: pre-wrap; }
+  .header-ioc-highlight {
+    background: rgba(255,59,92,.1); color: var(--danger);
+    border-radius: 4px; padding: 2px 4px; cursor: help;
+    text-decoration: underline dotted;
+  }
+
+  .mailClient {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); overflow: hidden; margin-bottom: 24px;
+  }
+  .mailTop {
+    background: rgba(0,0,0,.3); padding: 18px 24px;
+    display: flex; flex-direction: column; gap: 8px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .mailTop strong { color: var(--muted); margin-right: 8px; }
+  .email-body-text { padding: 24px; font-size: 14px; line-height: 1.85; color: #c0c8de; }
+  .email-body-text p { margin-bottom: 12px; }
+  .emailFlag {
+    background: rgba(255,184,0,.1); border-bottom: 1.5px dashed var(--warn);
+    padding: 1px 3px; cursor: pointer; border-radius: 3px;
+    transition: background .2s;
+  }
+  .emailFlag:hover { background: rgba(255,184,0,.22); }
+  .emailFlag.found { background: rgba(0,214,143,.15); border-bottom-color: var(--success); }
+  #emailLabScore {
+    font-family: var(--font-display); font-size: 22px; font-weight: 700;
+    color: var(--accent); text-align: center; margin-top: 8px;
+  }
+
+  /* ── WEBSITE SECTION ── */
+  .websiteContainer {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 24px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 700px) { .websiteContainer { grid-template-columns: 1fr; } }
+  .loginCard {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 28px 24px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .loginCard h3 { font-size: 14px; font-weight: 700; }
+  .url { font-family: var(--font-mono); font-size: 12px; padding: 8px 12px; border-radius: 8px; }
+  .goodURL { background: rgba(0,214,143,.1); color: var(--success); border: 1px solid rgba(0,214,143,.2); }
+  .loginCard input {
+    background: rgba(0,0,0,.3); border: 1px solid var(--border);
+    border-radius: 8px; padding: 12px 14px; color: var(--text); font-size: 13px;
+  }
+  .loginCard button {
+    padding: 12px; border: none; border-radius: 8px;
+    font-weight: 700; font-size: 14px; cursor: pointer;
+  }
+  .fakeFlag { cursor: pointer; }
+  .fakeFlag.found { outline: 2px solid var(--success); border-radius: 4px; }
+  .url.fakeFlag { background: rgba(255,59,92,.1); color: var(--danger); border: 1px solid rgba(255,59,92,.2); }
+  #websiteScore {
+    font-family: var(--font-display); font-size: 20px; font-weight: 700;
+    color: var(--accent); text-align: center;
+  }
+
+  /* ── SOCIAL CARDS ── */
+  .social-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 32px 24px;
+    text-align: center; font-family: var(--font-display); font-size: 18px;
+    font-weight: 700; color: var(--text); cursor: pointer;
+    transition: border-color .3s, transform .2s, box-shadow .3s;
+  }
+  .social-card:hover { border-color: var(--accent2); transform: translateY(-4px); box-shadow: var(--glow); }
+  .social-card.revealed { border-color: var(--accent); }
+  .social-card .reveal-text { font-size: 12px; color: var(--muted); font-family: var(--font-body); font-weight: 400; margin-top: 10px; display: none; }
+  .social-card.revealed .reveal-text { display: block; }
+
+  /* ── TIMELINE ── */
+  .timeline { position: relative; padding-left: 40px; }
+  .timeline::before {
+    content: ''; position: absolute; left: 16px; top: 0; bottom: 0;
+    width: 2px; background: linear-gradient(to bottom, var(--accent), var(--accent2));
+  }
+  .timelineItem { position: relative; margin-bottom: 36px; }
+  .circle {
+    position: absolute; left: -47px; top: 0;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-size: 12px; font-weight: 800; color: #000;
+    box-shadow: var(--glow);
+  }
+  .timelineItem .content {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px 24px;
+    transition: border-color .3s;
+  }
+  .timelineItem:hover .content { border-color: rgba(0,229,255,.3); }
+  .timelineItem .content h3 { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+  .timelineItem .content p { font-size: 13px; color: var(--muted); }
+
+  /* ── TIPS SECTION (NEW) ── */
+  .tips-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 20px;
+    margin-top: 8px;
+  }
+  .tip-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+  }
+  .tip-card .tip-num {
+    font-family: var(--font-mono); font-size: 11px; color: var(--accent2);
+    letter-spacing: 2px; margin-bottom: 10px;
+  }
+  .tip-card h4 { font-family: var(--font-display); font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .tip-card p { font-size: 13px; color: var(--muted); }
+
+  /* ── CHECKLIST SECTION (NEW) ── */
+  .checklist { display: flex; flex-direction: column; gap: 12px; }
+  .check-item {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 22px;
+    cursor: pointer; transition: border-color .2s;
+  }
+  .check-item:hover { border-color: rgba(0,229,255,.2); }
+  .check-item.checked { border-color: var(--success); background: rgba(0,214,143,.05); }
+  .check-item .check-box {
+    width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--border);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    transition: background .2s, border-color .2s;
+    margin-top: 1px;
+  }
+  .check-item.checked .check-box { background: var(--success); border-color: var(--success); color: #000; }
+  .check-item .check-content h4 { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 3px; }
+  .check-item .check-content p { font-size: 13px; color: var(--muted); }
+
+  /* ── QUIZ SECTION ── */
+  #quiz { text-align: center; }
+  #quiz p { max-width: 540px; margin: 0 auto 36px; }
+  #startQuiz {
+    background: linear-gradient(135deg, var(--accent2), #9f67ff);
+    color: #fff; font-weight: 700; font-size: 16px;
+    padding: 16px 36px; border: none; border-radius: 12px;
+    cursor: pointer; box-shadow: 0 0 28px rgba(124,58,237,.35);
+    transition: transform .2s, box-shadow .2s;
+  }
+  #startQuiz:hover { transform: translateY(-3px); box-shadow: 0 0 44px rgba(124,58,237,.5); }
+
+  /* ── FOOTER ── */
+  footer {
+    position: relative; z-index: 1;
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 48px 40px; text-align: center;
+  }
+  footer h3 { font-family: var(--font-display); font-size: 18px; font-weight: 800; color: var(--accent); margin-bottom: 8px; }
+  footer p { color: var(--muted); font-size: 13px; }
+
+  /* ══════════════════════════════
+     MODALS — new styled popups
+  ══════════════════════════════ */
+  .modal {
+    display: none; position: fixed; inset: 0; z-index: 2000;
+    align-items: center; justify-content: center;
+    background: rgba(0,0,0,.7); backdrop-filter: blur(10px);
+    padding: 20px;
+  }
+  .modal.active { display: flex; animation: fadeIn .2s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 560px; width: 100%;
+    position: relative;
+    animation: popUp .35s cubic-bezier(.22,1,.36,1);
+    box-shadow: 0 32px 80px rgba(0,0,0,.6);
+  }
+  @keyframes popUp {
+    from { opacity: 0; transform: scale(.9) translateY(20px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  .modal-box.danger { border-color: rgba(255,59,92,.3); }
+  .modal-box.success { border-color: rgba(0,214,143,.3); }
+
+  .modal-header {
+    display: flex; align-items: flex-start; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .modal-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin-bottom: 16px; flex-shrink: 0;
+  }
+  .modal-icon.danger { background: rgba(255,59,92,.15); color: var(--danger); }
+  .modal-icon.success { background: rgba(0,214,143,.15); color: var(--success); }
+  .modal-icon.warn { background: rgba(255,184,0,.15); color: var(--warn); }
+  .modal-icon.info { background: rgba(0,229,255,.12); color: var(--accent); }
+
+  .modal-close {
+    background: transparent; border: 1px solid var(--border);
+    color: var(--muted); width: 34px; height: 34px;
+    border-radius: 8px; cursor: pointer; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color .2s, color .2s; flex-shrink: 0;
+  }
+  .modal-close:hover { border-color: var(--accent); color: var(--accent); }
+
+  .modal-box h2 {
+    font-family: var(--font-display); font-size: 22px; font-weight: 800;
+    color: #fff; margin-bottom: 10px; letter-spacing: -0.5px;
+  }
+  .modal-box p { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+  .modal-log {
+    background: rgba(0,0,0,.4); border: 1px solid rgba(255,59,92,.2);
+    border-radius: 10px; padding: 16px 18px; margin: 18px 0;
+    font-family: var(--font-mono); font-size: 12px; color: #fca5a5; line-height: 2;
+  }
+  .modal-log .log-label { color: var(--muted); }
+
+  .modal-input {
+    width: 100%; background: rgba(0,0,0,.3); border: 1px solid var(--border);
+    border-radius: 10px; padding: 13px 16px; color: var(--text); font-size: 14px;
+    margin: 20px 0 16px; font-family: var(--font-body); outline: none;
+    transition: border-color .2s;
+  }
+  .modal-input:focus { border-color: var(--accent); }
+
+  .modal-btn {
+    width: 100%; padding: 14px; border: none; border-radius: 10px;
+    font-weight: 700; font-size: 15px; cursor: pointer;
+    transition: transform .2s, box-shadow .2s;
+  }
+  .modal-btn:hover { transform: translateY(-2px); }
+  .modal-btn.danger { background: linear-gradient(135deg, var(--danger), #c0001f); color: #fff; }
+  .modal-btn.success { background: linear-gradient(135deg, var(--success), #00a06c); color: #000; }
+  .modal-btn.accent { background: linear-gradient(135deg, var(--accent2), #9f67ff); color: #fff; }
+  .modal-btn.primary { background: linear-gradient(135deg, var(--accent), #00b8d4); color: #000; }
+
+  /* quiz modal extras */
+  .quiz-progress { margin-bottom: 20px; }
+  .quiz-progress-bar {
+    height: 4px; background: var(--border); border-radius: 2px; margin-top: 8px;
+  }
+  .quiz-progress-fill {
+    height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 2px; transition: width .4s ease;
+  }
+  .quiz-meta { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px; color: var(--muted); }
+  #question { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 20px; line-height: 1.5; }
+  #answers { display: flex; flex-direction: column; gap: 10px; }
+  .answer-btn {
+    background: rgba(255,255,255,.04); border: 1px solid var(--border);
+    border-radius: 10px; padding: 14px 18px; color: var(--text);
+    font-size: 14px; text-align: left; cursor: pointer;
+    transition: border-color .2s, background .2s, transform .1s;
+  }
+  .answer-btn:hover:not(:disabled) { border-color: rgba(0,229,255,.35); background: rgba(0,229,255,.06); transform: translateX(4px); }
+  .answer-btn.correct { border-color: var(--success); background: rgba(0,214,143,.1); color: var(--success); }
+  .answer-btn.wrong { border-color: var(--danger); background: rgba(255,59,92,.1); color: var(--danger); }
+  .answer-btn:disabled { cursor: default; }
+  #nextQuestion {
+    margin-top: 20px; padding: 12px 28px; border: none; border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent2), #9f67ff); color: #fff;
+    font-weight: 700; font-size: 14px; cursor: pointer;
+    transition: opacity .2s; display: none;
+  }
+  #nextQuestion.visible { display: inline-block; }
+
+  .cert-name-row { display: flex; gap: 10px; margin: 20px 0 16px; }
+  .cert-name-row .modal-input { margin: 0; flex: 1; }
+  .cert-stars { font-size: 28px; text-align: center; margin: 12px 0; letter-spacing: 4px; }
+
+  /* intercept modal */
+  .intercept-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 16px 0;
+  }
+  .intercept-item {
+    background: rgba(0,0,0,.35); border: 1px solid rgba(255,59,92,.15);
+    border-radius: 8px; padding: 12px 14px; font-family: var(--font-mono); font-size: 12px;
+  }
+  .intercept-item .label { color: var(--muted); font-size: 11px; margin-bottom: 4px; }
+  .intercept-item .value { color: var(--danger); word-break: break-all; }
+
+  /* social popup */
+  #socialModal .modal-box { max-width: 460px; }
+
+  /* section separator line */
+  .sep { width: 100%; height: 1px; background: var(--border); margin: 0; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 768px) {
+    header { padding: 0 20px; }
+    nav { display: none; }
+    #home { padding: 60px 20px; }
+    .hero-badge { display: none; }
+    section:not(.stats):not(#home) { padding: 60px 20px; }
+    .hero-btns { flex-direction: column; }
+    .btn-primary, .btn-ghost { width: 100%; text-align: center; }
+    footer { padding: 40px 20px; }
+  }
+</style>
 </head>
 <body>
 
-    <div id="loader">
-        <div class="loader-circle"></div>
-        <h2>Loading PhishShield Engine...</h2>
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-ring"></div>
+  <h2>INITIALIZING PHISHSHIELD...</h2>
+</div>
+
+<!-- PROGRESS -->
+<div id="progressBar"></div>
+
+<!-- TOAST CONTAINER -->
+<div id="toastContainer"></div>
+
+<!-- PARTICLES -->
+<div id="particles"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <i class="fa-solid fa-shield-halved"></i>
+    <h2>PhishShield</h2>
+  </div>
+  <nav>
+    <a href="#home">Home</a>
+    <a href="#about">About</a>
+    <a href="#types">Types</a>
+    <a href="#email">Email Lab</a>
+    <a href="#website">Website</a>
+    <a href="#social">Psychology</a>
+    <a href="#tips">Tips</a>
+    <a href="#checklist">Checklist</a>
+    <a href="#timeline">Timeline</a>
+    <a href="#quiz">Quiz</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section id="home">
+  <div class="hero-content">
+    <div class="hero-eyebrow"><i class="fa-solid fa-shield-halved"></i> Cyber Awareness Training</div>
+    <h1>Don't Get <span>Hooked.</span><br>Learn to Detect Phishing.</h1>
+    <p>An interactive platform to understand how phishing attacks work, recognize the red flags, and build strong habits before attackers exploit them.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" id="startTraining"><i class="fa-solid fa-play" style="margin-right:8px"></i>Start Training</button>
+      <button class="btn-ghost" onclick="document.getElementById('quiz').scrollIntoView({behavior:'smooth'})"><i class="fa-solid fa-graduation-cap" style="margin-right:8px"></i>Take the Quiz</button>
     </div>
+  </div>
+  <div class="hero-badge">
+    <i class="fa-solid fa-user-secret hacker"></i>
+  </div>
+</section>
 
-    <div id="toast"></div>
+<!-- STATS -->
+<div class="stats">
+  <div class="card"><h2 id="stat1">0</h2><p>Phishing Emails Sent Daily</p></div>
+  <div class="card"><h2 id="stat2">0%</h2><p>Cyber Attacks Start with Phishing</p></div>
+  <div class="card"><h2 id="stat3">$0M</h2><p>Lost Every Hour Worldwide</p></div>
+  <div class="card"><h2 id="stat4">0s</h2><p>Average Time to Click a Phish</p></div>
+</div>
 
-    <div id="progressContainer">
-        <div id="progressBar"></div>
+<div class="sep"></div>
+
+<!-- ABOUT -->
+<section id="about">
+  <span class="section-label">// 01 — Understanding</span>
+  <h2>What is Phishing?</h2>
+  <p>Phishing is a social engineering attack where adversaries impersonate trusted entities to deceive victims into revealing credentials, financial data, or installing malware.</p>
+  <div class="attack-flow">
+    <div><i class="fa-solid fa-envelope"></i><h3>Fake Email</h3></div>
+    <i class="fa-solid fa-arrow-right"></i>
+    <div><i class="fa-solid fa-link"></i><h3>Malicious Link</h3></div>
+    <i class="fa-solid fa-arrow-right"></i>
+    <div><i class="fa-solid fa-globe"></i><h3>Fake Website</h3></div>
+    <i class="fa-solid fa-arrow-right"></i>
+    <div><i class="fa-solid fa-user-lock"></i><h3>Data Stolen</h3></div>
+    <i class="fa-solid fa-arrow-right"></i>
+    <div><i class="fa-solid fa-skull-crossbones"></i><h3>Account Breach</h3></div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- TYPES -->
+<section id="types">
+  <span class="section-label">// 02 — Attack Vectors</span>
+  <h2>Vectors of Phishing</h2>
+  <p>Phishing comes in many forms. Each vector exploits a different communication channel or trust relationship.</p>
+  <div class="grid">
+    <div class="type-card"><i class="fa-solid fa-envelope"></i><h3>Email Phishing</h3><p>Mass-scale campaigns sent to thousands of targets simultaneously using bulk mailing tools.</p></div>
+    <div class="type-card"><i class="fa-solid fa-user"></i><h3>Spear Phishing</h3><p>Targeted campaigns using personalized intelligence about the victim to appear credible.</p></div>
+    <div class="type-card"><i class="fa-solid fa-building"></i><h3>Whaling</h3><p>High-value attacks targeting executives, CFOs, and C-suite personnel for maximum payoff.</p></div>
+    <div class="type-card"><i class="fa-solid fa-phone"></i><h3>Vishing</h3><p>Voice calls using spoofed caller IDs impersonating banks, government agencies, or IT support.</p></div>
+    <div class="type-card"><i class="fa-solid fa-comment"></i><h3>Smishing</h3><p>SMS-based attacks delivering malicious links disguised as delivery notifications or alerts.</p></div>
+    <div class="type-card"><i class="fa-solid fa-clone"></i><h3>Clone Phishing</h3><p>Duplicating a legitimate email but swapping links or attachments with malicious variants.</p></div>
+    <div class="type-card"><i class="fa-solid fa-fish"></i><h3>Angler Phishing</h3><p>Attackers pose as brand support on social media, intercepting public complaints.</p></div>
+    <div class="type-card"><i class="fa-solid fa-qrcode"></i><h3>QRishing</h3><p>Embedding malicious URLs inside QR codes placed in physical or digital environments.</p></div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- EMAIL LAB -->
+<section id="email">
+  <span class="section-label">// 03 — Email Lab</span>
+  <h2>Advanced Email Inspection Lab</h2>
+  <p>Analyze the simulated email below. Click all <strong style="color:#fff">8 hidden red flags</strong> to complete the lab.</p>
+  <div style="text-align:center;margin-bottom:24px">
+    <button id="toggleHeadersBtn" class="secondary-btn"><i class="fa-solid fa-code" style="margin-right:6px"></i>Inspect Raw Mail Headers</button>
+  </div>
+  <div id="rawHeadersBox" class="raw-headers-panel" style="display:none">
+    <h4><i class="fa-solid fa-terminal"></i> FORENSIC MAIL HEADER ANALYSIS</h4>
+    <pre>Delivered-To: victim@enterprise-corp.com
+Received: from mail-server.micr0soft-support.com (unverified [185.220.101.5])
+From: "Microsoft Security" &lt;security@micr0soft-support.com&gt;
+<span class="header-ioc-highlight" title="SPF FAIL: Sending IP is not authorized by Microsoft's SPF records.">Authentication-Results: spf=fail (sender IP 185.220.101.5 is not permitted)</span>
+<span class="header-ioc-highlight" title="DKIM FAIL: Cryptographic signature verification failed — message was forged or altered.">DKIM-Signature: v=1; d=micr0soft-support.com; bh=FAIL; b=INVALID...</span>
+<span class="header-ioc-highlight" title="DMARC REJECT: High-risk mismatch isolated by domain policy monitoring.">DMARC-Filter: action=reject policy=none</span>
+X-Mailer: MassMailExploitTool v4.2</pre>
+  </div>
+  <div class="mailClient">
+    <div class="mailTop">
+      <div><strong>From:</strong> <span class="emailFlag" data-tip="⚠ Fake Domain: The '0' (zero) in 'micr0soft' is not the real Microsoft domain.">security@micr0soft-support.com</span></div>
+      <div><strong>Reply-To:</strong> <span class="emailFlag" data-tip="⚠ Mismatch: Reply-To routes to an external webmail — not a Microsoft server.">verify@hotmail-security.net</span></div>
     </div>
-
-    <div id="particles"></div>
-
-    <header>
-        <div class="logo">
-            <i class="fa-solid fa-shield-halved"></i>
-            <h2>PhishShield</h2>
-        </div>
-        <nav>
-            <a href="#home">Home</a>
-            <a href="#about">About</a>
-            <a href="#types">Types</a>
-            <a href="#email">Email Lab</a>
-            <a href="#website">Website Detector</a>
-            <a href="#social">Social Engineering</a>
-            <a href="#timeline">Timeline</a>
-            <a href="#quiz">Quiz</a>
-        </nav>
-    </header>
-
-    <section id="home" class="hero">
-        <div class="hero-content">
-            <h1>Protect Yourself From <span>Phishing Attacks</span></h1>
-            <p>
-                An Interactive Cybersecurity Awareness Platform. Learn how threat actors steal credentials,
-                recognize indicators of compromise (IoCs), and defend yourself against modern social engineering.
-            </p>
-            <button id="startTraining">Start Training</button>
-        </div>
-        <div class="hero-image">
-            <i class="fa-solid fa-user-secret hacker"></i>
-        </div>
-    </section>
-
-    <section class="stats">
-        <div class="card">
-            <h2 id="stat1">0</h2>
-            <p>Phishing Emails Sent Daily</p>
-        </div>
-        <div class="card">
-            <h2 id="stat2">0%</h2>
-            <p>Cyber Attacks Start with Email</p>
-        </div>
-        <div class="card">
-            <h2 id="stat3">$0M</h2>
-            <p>Lost Every Hour Worldwide</p>
-        </div>
-    </section>
-
-    <section id="about">
-        <h2>What is Phishing?</h2>
-        <p>
-            Phishing is a form of social engineering where attackers impersonate trusted organizations or 
-            legitimate individuals to trick victims into revealing sensitive corporate or personal data.
-        </p>
-        <div class="attack-flow">
-            <div>
-                <i class="fa-solid fa-envelope"></i>
-                <h3>Fake Email</h3>
-            </div>
-            <i class="fa-solid fa-arrow-right"></i>
-            <div>
-                <i class="fa-solid fa-link"></i>
-                <h3>Malicious Link</h3>
-            </div>
-            <i class="fa-solid fa-arrow-right"></i>
-            <div>
-                <i class="fa-solid fa-globe"></i>
-                <h3>Fake Website</h3>
-            </div>
-            <i class="fa-solid fa-arrow-right"></i>
-            <div>
-                <i class="fa-solid fa-user-lock"></i>
-                <h3>Data Stolen</h3>
-            </div>
-        </div>
-    </section>
-
-    <section id="types">
-        <h2>Vectors of Phishing</h2>
-        <div class="grid">
-            <div class="type-card">
-                <i class="fa-solid fa-envelope"></i>
-                <h3>Email Phishing</h3>
-                <p>Mass-scale, generic campaigns broadcasted to thousands of potential victims simultaneously.</p>
-            </div>
-            <div class="type-card">
-                <i class="fa-solid fa-user"></i>
-                <h3>Spear Phishing</h3>
-                <p>Highly targeted spear campaigns directed at specific personnel using personalized intelligence.</p>
-            </div>
-            <div class="type-card">
-                <i class="fa-solid fa-building"></i>
-                <h3>Whaling</h3>
-                <p>High-profile operations explicitly targeting executives, CEOs, or financial stakeholders.</p>
-            </div>
-            <div class="type-card">
-                <i class="fa-solid fa-phone"></i>
-                <h3>Vishing</h3>
-                <p>Voice-based social engineering conducted over telephone networks using spoofed caller IDs.</p>
-            </div>
-            <div class="type-card">
-                <i class="fa-solid fa-comment"></i>
-                <h3>Smishing</h3>
-                <p>SMS or text-based attacks exploiting mobile communication links and messaging channels.</p>
-            </div>
-            <div class="type-card">
-                <i class="fa-solid fa-wifi"></i>
-                <h3>Clone Phishing</h3>
-                <p>Modifying a previously delivered legitimate transmission to inject weaponized attachments/links.</p>
-            </div>
-        </div>
-    </section>
-
-    <section id="email">
-        <h2>Advanced Email Inspection Lab</h2>
-        <p>Analyze the email headers and body context below. Click on all 8 hidden indicators of compromise (IoCs).</p>
-        
-        <div style="text-align: center; margin-bottom: 20px;">
-            <button id="toggleHeadersBtn" class="secondary-btn"><i class="fa-solid fa-code"></i> Inspect Raw Technical Mail Headers</button>
-        </div>
-
-        <div id="rawHeadersBox" class="raw-headers-panel" style="display: none;">
-            <h4><i class="fa-solid fa-terminal"></i> Forensic Mail Header Analysis (SIEM Log View)</h4>
-            <pre>
-Delivered-To: victim@enterprise-corp.com
-Received: from mail-server.micr0soft-support.com (unverified-host [185.220.101.5])
-From: "Microsoft Security Operations" &lt;security@micr0soft-support.com&gt;
-<span class="header-ioc-highlight" title="SPF Failure: The sending IP is not authorized by Microsoft's authentic SPF configuration database records.">Authentication-Results: spf=fail (sender IP is 185.220.101.5)</span>
-<span class="header-ioc-highlight" title="DKIM Failure: Cryptographic signature verification failed. Message body was altered or forged during transport.">DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=micr0soft-support.com; s=selector1; h=From:To:Subject; bh=FAIL...</span>
-<span class="header-ioc-highlight" title="DMARC Reject Policy Triggered: High-risk mismatch isolated by domain infrastructure monitoring policies.">DMARC-Filter: OpenDMARC Filter v1.4.2 action=reject policy=none</span>
-X-Mailer: MassMailExploitTool v4.2
-            </pre>
-        </div>
-
-        <div class="mailClient">
-            <div class="mailTop">
-                <div>
-                    <strong>From:</strong>
-                    <span class="emailFlag" data-tip="Fake Domain Alert: Notice the zero '0' instead of an 'o' in micr0soft.">security@micr0soft-support.com</span>
-                </div>
-                <div>
-                    <strong>Reply-To:</strong>
-                    <span class="emailFlag" data-tip="Mismatch Flag: Reply-To routes to an external personal webmail address instead of an enterprise server.">verify@hotmail-security.net</span>
-                </div>
-            </div>
-            <hr>
-            <h3><i class="fa-solid fa-triangle-exclamation" style="color: #dc2626;"></i> Immediate Action Required</h3>
-            <div class="email-body-text">
-                <p>Dear <span class="emailFlag" data-tip="Generic Salutation: Legitimate organizations communicate with personalized account references.">Customer</span>,</p>
-                <p>We noticed unusual activities detected inside your infrastructure profile.</p>
-                <p>Failure to complete explicit verification processing within <span class="emailFlag" data-tip="Artificial Urgency: Forcing rapid action to mitigate psychological critical thinking.">12 hours</span> will result in permanent service execution suspension.</p>
-                <p>Please download the attached validation summary invoice ledger documentation:</p>
-                <p>📎 <span class="emailFlag" data-tip="Malicious Executable Extension: Double extension hides an executable payload file type (.exe).">Invoice.pdf.exe</span></p>
-                <p>Select the portal shortcut to update account authorization flags:</p>
-                <p><span class="emailFlag" data-tip="Deceptive Display URL: The link target domain is untrusted and matches malicious server signatures.">https://microsoft-login-security.xyz</span></p>
-                <p>If you fail to verify immediately, <span class="emailFlag" data-tip="Coercive Threat/Fear Tactic: High-consequence threats are used to force obedience.">your account database assets will be deleted forever.</span></p>
-                <hr>
-                <p>Regards,<br><span class="emailFlag" data-tip="Missing Clear Contact Data: Lacks professional contact numbers, regulatory headers, or valid enterprise signatures.">Microsoft Security Team</span></p>
-            </div>
-        </div>
-        <h3 id="emailLabScore">0 / 8 Indicators Found</h3>
-    </section>
-
-    <section id="website">
-        <h2>Website Detection Challenge</h2>
-        <p>Compare the operational login views. Analyze and click the 3 suspicious items located within the fake interface card.</p>
-        
-        <div class="websiteContainer">
-            <div class="loginCard legit">
-                <h3><i class="fa-solid fa-circle-check" style="color: #16a34a;"></i> Authentic Microsoft Service</h3>
-                <p class="url goodURL">https://login.microsoftonline.com</p>
-                <input type="email" placeholder="Email, phone, or Skype" disabled>
-                <input type="password" placeholder="Password" disabled>
-                <button style="background: #0078d4; width: 100%;">Next</button>
-            </div>
-            
-            <div class="loginCard fake">
-                <h3><i class="fa-solid fa-triangle-exclamation" style="color: #dc2626;"></i> Target Simulation Portal</h3>
-                <p class="url fakeFlag" data-tip="Domain Discrepancy: This is an unverified external third-party registrar URL.">https://microsoft-login-security.xyz</p>
-                
-                <form id="simulatorLoginForm" class="sim-form-layout">
-                    <input type="email" id="simEmail" placeholder="Enter Microsoft Email Account" required>
-                    <input type="password" id="simPassword" placeholder="Enter Password" required>
-                    <button type="submit" class="fakeFlag action-btn" data-tip="Coercive Form Labeling: Actions like 'Verify Account' replace basic login operations to create pressure.">Verify Account</button>
-                </form>
-                
-                <small class="fakeFlag" data-tip="Misleading Trust Indicator: SSL Certificates encrypt traffic but do not validate user intent or legitimacy.">🔒 Secure Connection Certified</small>
-            </div>
-        </div>
-        <h3 id="websiteScore">Fake Website Indicators Found : 0 / 3</h3>
-    </section>
-
-    <div id="exploitInterceptModal" class="modal">
-        <div class="modal-content" style="border-color: #dc2626; box-shadow: 0 0 40px rgba(220, 38, 38, 0.4);">
-            <h2 style="color: #dc2626;"><i class="fa-solid fa-hand-holding-skull"></i> DATA EXFILTRATION BLOCKED</h2>
-            <hr style="border-color: rgba(255,255,255,0.1); margin: 15px 0;">
-            <p style="color: #ffffff; line-height: 26px;">
-                <strong>Security Analysis:</strong> You just hit submit on a malicious domain! If this wasn't a sandbox, your credentials would have been transmitted in <strong>plain-text logs</strong> directly to the adversary's Command-and-Control (C2) infrastructure.
-            </p>
-            <div style="background: rgba(220, 38, 38, 0.1); border-left: 4px solid #dc2626; padding: 15px; margin: 15px 0; font-family: monospace; font-size: 14px; color: #fca5a5; text-align: left;">
-                [OUTBOUND LOG DATA TRACKED INTERCEPTED]:<br>
-                Identity Node: <span id="interceptedUser">---</span><br>
-                Payload String: <span id="interceptedPass">---</span><br>
-                Target Exfil Server: https://microsoft-login-security.xyz/log.php
-            </div>
-            <button id="closeInterceptBtn" style="background: #dc2626; color: #ffffff; margin-top: 10px; width: 100%;">Acknowledge and Close Vector</button>
-        </div>
+    <div class="email-body-text">
+      <h3 style="color:var(--danger);margin-bottom:16px"><i class="fa-solid fa-triangle-exclamation"></i> Immediate Action Required</h3>
+      <p>Dear <span class="emailFlag" data-tip="⚠ Generic Salutation: Legitimate companies use your real name, not 'Customer'.">Customer</span>,</p>
+      <p>We noticed unusual activities detected inside your account profile.</p>
+      <p>Failure to verify within <span class="emailFlag" data-tip="⚠ Artificial Urgency: Creating panic to prevent rational decision-making.">12 hours</span> will result in permanent suspension.</p>
+      <p>Download the attached file: 📎 <span class="emailFlag" data-tip="⚠ Double Extension: Invoice.pdf.exe is an executable disguised as a PDF document.">Invoice.pdf.exe</span></p>
+      <p>Click to verify: <span class="emailFlag" data-tip="⚠ Deceptive URL: This domain is not owned by Microsoft — it's a phishing server.">https://microsoft-login-security.xyz</span></p>
+      <p>If you fail to act, <span class="emailFlag" data-tip="⚠ Fear Tactic: High-stakes threats override rational thinking — a core manipulation technique.">your account data will be permanently deleted.</span></p>
+      <hr style="border-color:var(--border);margin:16px 0">
+      <p>Regards,<br><span class="emailFlag" data-tip="⚠ Missing Contact Info: No phone number, company address, or valid enterprise signature.">Microsoft Security Team</span></p>
     </div>
+  </div>
+  <h3 id="emailLabScore">0 / 8 Indicators Found</h3>
+</section>
 
-    <section id="social">
-        <h2>Psychological Exploitation Paradigms</h2>
-        <p>Click on each threat card to map the psychological core vectors used across phishing frameworks.</p>
-        <div class="grid">
-            <div class="social-card">Fear</div>
-            <div class="social-card">Urgency</div>
-            <div class="social-card">Authority</div>
-            <div class="social-card">Curiosity</div>
-            <div class="social-card">Reward</div>
-            <div class="social-card">Scarcity</div>
-        </div>
-    </section>
+<div class="sep"></div>
 
-    <section id="timeline">
-        <h2>Phishing Lifecycle Mechanics</h2>
-        <p>Deconstruct the typical execution timeline of a multi-stage corporate credential harvesting sequence.</p>
-        <div class="timeline">
-            <div class="timelineItem">
-                <div class="circle">1</div>
-                <div class="content">
-                    <h3>Payload Generation</h3>
-                    <p>The malicious actor stands up infrastructure and crafts social engineering lures designed to bypass mail filters.</p>
-                </div>
-            </div>
-            <div class="timelineItem">
-                <div class="circle">2</div>
-                <div class="content">
-                    <h3>Inbound Vector Access</h3>
-                    <p>The malicious message enters internal endpoints and lands directly inside the target inbox.</p>
-                </div>
-            </div>
-            <div class="timelineItem">
-                <div class="circle">3</div>
-                <div class="content">
-                    <h3>Lure Interaction</h3>
-                    <p>The operator interacts with structural email fields and clicks the hyperlinked redirect URL.</p>
-                </div>
-            </div>
-            <div class="timelineItem">
-                <div class="circle">4</div>
-                <div class="content">
-                    <h3>Phishing Portal Landing</h3>
-                    <p>The client endpoint opens a spoofed landing page mimicking a legitimate authentication server.</p>
-                </div>
-            </div>
-            <div class="timelineItem">
-                <div class="circle">5</div>
-                <div class="content">
-                    <h3>Credential Exfiltration</h3>
-                    <p>The target keys in usernames, passwords, or multi-factor tokens, streaming plain text logs straight to the threat server.</p>
-                </div>
-            </div>
-            <div class="timelineItem">
-                <div class="circle">6</div>
-                <div class="content">
-                    <h3>Infrastructure Compromise</h3>
-                    <p>The adversary leverages stolen session parameters or data points to gain persistent network access.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="quiz">
-        <h2>Assessment Readiness Review</h2>
-        <p>Validate your knowledge against corporate compliance standards to generate your certificate of completion.</p>
-        <button id="startQuiz">Launch Interactive Quiz</button>
-    </section>
-
-    <footer>
-        <h3>PhishShield Portal System</h3>
-        <p>Engineered for Enterprise Cybersecurity Incident Training Evaluation.</p>
-    </footer>
-
-    <div id="quizModal" class="modal">
-        <div class="modal-content">
-            <span class="closeQuiz">&times;</span>
-            <h2>Cyber Awareness Evaluation</h2>
-            <div id="quizContainer">
-                <p id="question">Question placeholder text.</p>
-                <div id="answers"></div>
-                <button id="nextQuestion">Advance Question</button>
-            </div>
-        </div>
+<!-- WEBSITE -->
+<section id="website">
+  <span class="section-label">// 04 — Website Detection</span>
+  <h2>Website Detection Challenge</h2>
+  <p>Compare these two login portals. Find and click the <strong style="color:#fff">3 suspicious items</strong> in the fake card.</p>
+  <div class="websiteContainer">
+    <div class="loginCard legit">
+      <h3><i class="fa-solid fa-circle-check" style="color:var(--success)"></i> Authentic Microsoft Portal</h3>
+      <p class="url goodURL">https://login.microsoftonline.com</p>
+      <input type="email" placeholder="Email, phone, or Skype" disabled>
+      <input type="password" placeholder="Password" disabled>
+      <button style="background:#0078d4;color:#fff;width:100%;border-radius:8px">Next</button>
     </div>
-
-    <div id="certificateModal" class="modal">
-        <div class="modal-content">
-            <h2>🎉 Certification Verification Achieved</h2>
-            <p>You have demonstrated comprehensive awareness capability against technical social engineering tactics.</p>
-            <input type="text" id="username" placeholder="Enter Full Professional Name">
-            <button id="generateCertificate">Generate Secure Document</button>
-        </div>
+    <div class="loginCard fake">
+      <h3><i class="fa-solid fa-triangle-exclamation" style="color:var(--danger)"></i> Suspicious Portal (Simulation)</h3>
+      <p class="url fakeFlag" data-tip="⚠ Untrusted Domain: This URL is not owned by Microsoft. Look for 'microsoftonline.com' not 'microsoft-login-security.xyz'.">https://microsoft-login-security.xyz</p>
+      <form id="simulatorLoginForm">
+        <input type="email" id="simEmail" placeholder="Enter Microsoft Email" style="background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--text);font-size:13px;width:100%;margin-bottom:10px">
+        <input type="password" id="simPassword" placeholder="Enter Password" style="background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:12px 14px;color:var(--text);font-size:13px;width:100%;margin-bottom:10px">
+        <button type="submit" class="fakeFlag" style="background:var(--danger);color:#fff;width:100%;border-radius:8px;padding:12px;font-weight:700;cursor:pointer;border:none" data-tip="⚠ Coercive Label: 'Verify Account' creates psychological pressure instead of a normal login action.">Verify Account</button>
+      </form>
+      <small class="fakeFlag" style="display:block;margin-top:8px;font-size:12px;color:var(--muted)" data-tip="⚠ False Trust Signal: SSL encrypts traffic but does NOT mean a site is legitimate or safe.">🔒 Secure Connection Certified</small>
     </div>
+  </div>
+  <h3 id="websiteScore">Fake Website Indicators Found: 0 / 3</h3>
+</section>
 
-    <audio id="clickSound"><source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav"></audio>
-    <audio id="successSound"><source src="https://assets.mixkit.co/active_storage/sfx/1435/1435-84.wav"></audio>
-    <audio id="errorSound"><source src="https://assets.mixkit.co/active_storage/sfx/2573/2573-84.wav"></audio>
+<!-- EXPLOIT INTERCEPT MODAL -->
+<div id="exploitInterceptModal" class="modal">
+  <div class="modal-box danger" style="max-width:520px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-icon danger"><i class="fa-solid fa-hand-holding-skull"></i></div>
+        <h2>DATA EXFILTRATION BLOCKED</h2>
+        <p>You submitted credentials to a simulated phishing portal. In a real attack, this data would be transmitted to an adversary's C2 server in plain text.</p>
+      </div>
+    </div>
+    <div class="modal-log">
+      <div><span class="log-label">[INTERCEPTED LOG]</span></div>
+      <div>Identity: <span id="interceptedUser" style="color:var(--warn)">—</span></div>
+      <div>Payload: <span id="interceptedPass" style="color:var(--warn)">—</span></div>
+      <div>Exfil Server: <span style="color:var(--danger)">microsoft-login-security.xyz/log.php</span></div>
+    </div>
+    <button class="modal-btn danger" id="closeInterceptBtn"><i class="fa-solid fa-shield-halved" style="margin-right:8px"></i>Acknowledge & Close</button>
+  </div>
+</div>
 
-    <script src="script.js"></script>
-    <script src="quiz.js"></script>
-    <script src="certificate.js"></script>
+<div class="sep"></div>
+
+<!-- SOCIAL ENGINEERING -->
+<section id="social">
+  <span class="section-label">// 05 — Psychology</span>
+  <h2>Psychological Exploitation Tactics</h2>
+  <p>Phishing succeeds because it exploits human psychology, not just technology. Click each card to learn the manipulation mechanism.</p>
+  <div class="grid">
+    <div class="social-card" data-title="Fear" data-desc="Attackers create fear of account loss, legal action, or financial penalty to cloud judgment. When people are afraid, they act impulsively and skip verification steps.">
+      <i class="fa-solid fa-skull" style="color:var(--danger);font-size:24px;display:block;margin-bottom:12px"></i>
+      Fear
+      <div class="reveal-text">Triggers impulsive action by threatening negative consequences.</div>
+    </div>
+    <div class="social-card" data-title="Urgency" data-desc="'You have 12 hours to act!' — artificial deadlines prevent victims from pausing to verify the source. Time pressure is one of the most effective manipulation tools.">
+      <i class="fa-solid fa-clock" style="color:var(--warn);font-size:24px;display:block;margin-bottom:12px"></i>
+      Urgency
+      <div class="reveal-text">Artificial deadlines bypass rational decision-making.</div>
+    </div>
+    <div class="social-card" data-title="Authority" data-desc="Impersonating a bank, employer, or government agency instills trust and compliance. People are conditioned to follow instructions from figures of authority without question.">
+      <i class="fa-solid fa-building-columns" style="color:var(--accent);font-size:24px;display:block;margin-bottom:12px"></i>
+      Authority
+      <div class="reveal-text">Impersonating trusted entities lowers victim defenses.</div>
+    </div>
+    <div class="social-card" data-title="Curiosity" data-desc="'See who viewed your profile.' — curiosity drives clicks. Attackers craft enticing subject lines or mysterious links that feel irresistible to open.">
+      <i class="fa-solid fa-magnifying-glass" style="color:var(--accent2);font-size:24px;display:block;margin-bottom:12px"></i>
+      Curiosity
+      <div class="reveal-text">Intriguing bait compels victims to investigate before thinking critically.</div>
+    </div>
+    <div class="social-card" data-title="Reward" data-desc="'You've won a gift card!' — the promise of something valuable overwhelms skepticism. Greed and the desire for reward are powerful motivators that short-circuit caution.">
+      <i class="fa-solid fa-gift" style="color:var(--success);font-size:24px;display:block;margin-bottom:12px"></i>
+      Reward
+      <div class="reveal-text">Promises of prizes or bonuses override security instincts.</div>
+    </div>
+    <div class="social-card" data-title="Scarcity" data-desc="'Only 2 spots left!' — limited availability taps into loss aversion. People fear missing out more than they fear being deceived.">
+      <i class="fa-solid fa-hourglass-end" style="color:#ff6b35;font-size:24px;display:block;margin-bottom:12px"></i>
+      Scarcity
+      <div class="reveal-text">Fear of missing out (FOMO) drives hasty, unchecked action.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL CARD MODAL -->
+<div id="socialModal" class="modal">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-icon warn" id="socialModalIcon"><i class="fa-solid fa-brain"></i></div>
+        <h2 id="socialModalTitle">Tactic Name</h2>
+      </div>
+      <button class="modal-close" id="closeSocialModal">&times;</button>
+    </div>
+    <p id="socialModalDesc">Description here.</p>
+    <div style="margin-top:20px;padding:14px 18px;background:rgba(0,229,255,.06);border:1px solid rgba(0,229,255,.15);border-radius:10px;font-size:13px;color:var(--accent)">
+      <i class="fa-solid fa-lightbulb" style="margin-right:6px"></i>
+      <strong>Defence:</strong> <span id="socialModalDefence">Always pause and verify through an official channel before acting.</span>
+    </div>
+  </div>
+</div>
+
+<div class="sep"></div>
+
+<!-- TIPS (NEW SECTION) -->
+<section id="tips">
+  <span class="section-label">// 06 — Defence Tips</span>
+  <h2>How to Protect Yourself</h2>
+  <p>Knowing how phishing works is only half the battle. Here are the most effective defences you can apply right now.</p>
+  <div class="tips-grid">
+    <div class="tip-card"><div class="tip-num">TIP-01</div><h4>Verify the Sender Domain</h4><p>Never trust display names. Hover over or click the "From" field to see the actual sending domain. 'micr0soft.com' is not 'microsoft.com'.</p></div>
+    <div class="tip-card"><div class="tip-num">TIP-02</div><h4>Don't Click — Type It Instead</h4><p>When in doubt, don't click the link. Manually type the official URL into your browser to reach the real destination.</p></div>
+    <div class="tip-card"><div class="tip-num">TIP-03</div><h4>Enable Multi-Factor Authentication</h4><p>Even if credentials are stolen, MFA prevents unauthorized access by requiring a second verification step.</p></div>
+    <div class="tip-card"><div class="tip-num">TIP-04</div><h4>Inspect URLs Before Clicking</h4><p>Hover over hyperlinks to preview the real URL in your browser's status bar. Look for misspellings and unusual TLDs like .xyz or .info.</p></div>
+    <div class="tip-card"><div class="tip-num">TIP-05</div><h4>Report Suspicious Emails</h4><p>Use your email client's "Report Phishing" button or forward to your IT/security team. Your report may protect colleagues.</p></div>
+    <div class="tip-card"><div class="tip-num">TIP-06</div><h4>Keep Software Updated</h4><p>Phishing often delivers malware exploiting unpatched vulnerabilities. Regular updates eliminate these entry points.</p></div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- CHECKLIST (NEW SECTION) -->
+<section id="checklist">
+  <span class="section-label">// 07 — Self-Assessment</span>
+  <h2>Email Safety Checklist</h2>
+  <p>Before acting on any email, run through this checklist. Click each item as you verify it.</p>
+  <div class="checklist" id="safetyChecklist">
+    <div class="check-item" data-index="0"><div class="check-box"></div><div class="check-content"><h4>Sender domain is legitimate</h4><p>The actual sending domain (not just the display name) matches the official organization.</p></div></div>
+    <div class="check-item" data-index="1"><div class="check-box"></div><div class="check-content"><h4>No artificial urgency or threats</h4><p>The email doesn't pressure you to act in minutes or threaten negative consequences.</p></div></div>
+    <div class="check-item" data-index="2"><div class="check-box"></div><div class="check-content"><h4>Links point to official domains</h4><p>Hovering over links reveals the real destination — not a lookalike or shortened URL.</p></div></div>
+    <div class="check-item" data-index="3"><div class="check-box"></div><div class="check-content"><h4>No unexpected attachments</h4><p>You weren't expecting a file, or the attachment extension is unusual (e.g., .exe, .js, .vbs).</p></div></div>
+    <div class="check-item" data-index="4"><div class="check-box"></div><div class="check-content"><h4>Request verified through another channel</h4><p>You confirmed the request is legitimate by calling or messaging the sender directly — not via reply.</p></div></div>
+    <div class="check-item" data-index="5"><div class="check-box"></div><div class="check-content"><h4>Salutation uses your real name</h4><p>The email addresses you by name, not "Dear Customer" or "Valued User".</p></div></div>
+  </div>
+  <p id="checklistScore" style="margin-top:20px;font-family:var(--font-display);font-size:18px;font-weight:700;color:var(--accent)">0 / 6 Verified</p>
+</section>
+
+<div class="sep"></div>
+
+<!-- TIMELINE -->
+<section id="timeline">
+  <span class="section-label">// 08 — Attack Lifecycle</span>
+  <h2>Phishing Attack Lifecycle</h2>
+  <p>A complete credential harvesting attack unfolds in six distinct stages. Understanding each stage helps you intervene before it's too late.</p>
+  <div class="timeline">
+    <div class="timelineItem"><div class="circle">1</div><div class="content"><h3>Infrastructure Setup</h3><p>The attacker registers a lookalike domain, creates a phishing page, and configures mail servers to bypass spam filters.</p></div></div>
+    <div class="timelineItem"><div class="circle">2</div><div class="content"><h3>Payload Delivery</h3><p>A crafted email reaches the target inbox using social engineering to appear legitimate and bypass security gateways.</p></div></div>
+    <div class="timelineItem"><div class="circle">3</div><div class="content"><h3>Lure Interaction</h3><p>The victim reads the email, is psychologically manipulated (fear, urgency), and clicks the malicious link or attachment.</p></div></div>
+    <div class="timelineItem"><div class="circle">4</div><div class="content"><h3>Fake Portal Landing</h3><p>A spoofed login page mimicking a trusted service loads in the victim's browser, collecting entered credentials silently.</p></div></div>
+    <div class="timelineItem"><div class="circle">5</div><div class="content"><h3>Credential Exfiltration</h3><p>Submitted data is streamed to the attacker's C2 server. Victims are often redirected to the real site to avoid suspicion.</p></div></div>
+    <div class="timelineItem"><div class="circle">6</div><div class="content"><h3>Account Compromise</h3><p>The attacker uses stolen credentials to access corporate systems, escalate privileges, or launch further attacks internally.</p></div></div>
+  </div>
+</section>
+
+<div class="sep"></div>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <span class="section-label">// 09 — Knowledge Assessment</span>
+  <h2>Cyber Awareness Quiz</h2>
+  <p>Test your understanding. Score 70% or above to unlock your certificate of completion.</p>
+  <button id="startQuiz"><i class="fa-solid fa-rocket" style="margin-right:8px"></i>Launch Quiz</button>
+</section>
+
+<!-- QUIZ MODAL -->
+<div id="quizModal" class="modal">
+  <div class="modal-box" style="max-width:560px">
+    <div class="modal-header">
+      <div style="flex:1">
+        <div class="quiz-progress">
+          <div class="quiz-meta">
+            <span id="questionCounter">Question 1 of 10</span>
+            <span id="scoreTracker">Score: 0</span>
+          </div>
+          <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quizProgressFill" style="width:10%"></div></div>
+        </div>
+      </div>
+      <button class="modal-close" id="closeQuizModal" style="margin-left:14px">&times;</button>
+    </div>
+    <p id="question">Loading question...</p>
+    <div id="answers"></div>
+    <button id="nextQuestion">Next Question →</button>
+  </div>
+</div>
+
+<!-- CERTIFICATE MODAL -->
+<div id="certificateModal" class="modal">
+  <div class="modal-box success" style="max-width:480px">
+    <div class="modal-icon success"><i class="fa-solid fa-trophy"></i></div>
+    <h2>Training Complete!</h2>
+    <p>You've demonstrated strong phishing awareness. Enter your name to generate your certificate.</p>
+    <div class="cert-stars" id="certStars">⭐⭐⭐</div>
+    <p id="certScoreText" style="text-align:center;color:var(--success);font-weight:600;margin-bottom:4px"></p>
+    <div class="cert-name-row">
+      <input type="text" class="modal-input" id="username" placeholder="Enter your full name">
+    </div>
+    <button class="modal-btn success" id="generateCertificate"><i class="fa-solid fa-certificate" style="margin-right:8px"></i>Generate Certificate</button>
+  </div>
+</div>
+
+<!-- FAIL MODAL -->
+<div id="failModal" class="modal">
+  <div class="modal-box danger">
+    <div class="modal-icon danger"><i class="fa-solid fa-circle-xmark"></i></div>
+    <h2>Not Quite There</h2>
+    <p id="failText">You scored below the 70% passing threshold. Review the training materials and try again.</p>
+    <div style="margin-top:20px;display:flex;gap:10px">
+      <button class="modal-btn danger" id="retryQuizBtn" style="flex:1"><i class="fa-solid fa-rotate-left" style="margin-right:6px"></i>Try Again</button>
+      <button class="modal-btn" id="closeFailModal" style="flex:1;background:var(--surface);border:1px solid var(--border);color:var(--text)">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- IOC TOOLTIP MODAL -->
+<div id="iocModal" class="modal">
+  <div class="modal-box warn" style="max-width:420px">
+    <div class="modal-header">
+      <div>
+        <div class="modal-icon warn"><i class="fa-solid fa-triangle-exclamation"></i></div>
+        <h2>Indicator of Compromise</h2>
+      </div>
+      <button class="modal-close" id="closeIocModal">&times;</button>
+    </div>
+    <p id="iocModalText"></p>
+    <button class="modal-btn warn" id="closeIocModalBtn" style="margin-top:20px;background:linear-gradient(135deg,var(--warn),#e69500);color:#000">Got it</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <h3>PhishShield</h3>
+  <p>Interactive Phishing Awareness Platform · Built for Education & Cybersecurity Training</p>
+  <p style="margin-top:8px;font-size:12px;color:rgba(122,128,153,.5)">This is a simulation environment. No real data is collected or transmitted.</p>
+</footer>
+
+<!-- AUDIO -->
+<audio id="clickSound"><source src="https://assets.mixkit.co/active_storage/sfx/2568/2568-84.wav"></audio>
+<audio id="successSound"><source src="https://assets.mixkit.co/active_storage/sfx/1435/1435-84.wav"></audio>
+<audio id="errorSound"><source src="https://assets.mixkit.co/active_storage/sfx/2573/2573-84.wav"></audio>
+
+<script>
+// ── PARTICLES ──
+(function(){
+  const c = document.getElementById('particles');
+  for(let i=0;i<35;i++){
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.cssText = `
+      left:${Math.random()*100}%;
+      animation-duration:${8+Math.random()*16}s;
+      animation-delay:${Math.random()*10}s;
+      width:${1+Math.random()*2}px;
+      height:${1+Math.random()*2}px;
+      opacity:${0.2+Math.random()*0.5};
+    `;
+    c.appendChild(p);
+  }
+})();
+
+// ── LOADER ──
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('loader').classList.add('hide'), 1200);
+});
+
+// ── PROGRESS BAR ──
+window.addEventListener('scroll', () => {
+  const sc = document.documentElement.scrollTop;
+  const sh = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+  document.getElementById('progressBar').style.width = (sc/sh*100) + '%';
+});
+
+// ── TOAST ──
+function showToast(msg, type='info') {
+  const icons = { info:'fa-circle-info', success:'fa-circle-check', danger:'fa-circle-xmark', warn:'fa-triangle-exclamation' };
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<i class="fa-solid ${icons[type]||icons.info} toast-icon"></i><span>${msg}</span>`;
+  document.getElementById('toastContainer').appendChild(t);
+  setTimeout(() => { t.classList.add('fade-out'); setTimeout(() => t.remove(), 350); }, 3200);
+}
+
+// ── SOUND ──
+function playSound(id) {
+  try { document.getElementById(id).cloneNode(true).play(); } catch(e){}
+}
+
+// ── COUNTER ANIMATION ──
+function animateCount(el, target, suffix='', prefix='') {
+  let start=0, step=target/60;
+  const timer = setInterval(() => {
+    start += step;
+    if(start >= target) { clearInterval(timer); el.textContent = prefix+target+suffix; }
+    else el.textContent = prefix+Math.floor(start)+suffix;
+  }, 25);
+}
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(e.isIntersecting) {
+      animateCount(document.getElementById('stat1'), 3400000000, '');
+      animateCount(document.getElementById('stat2'), 91, '%');
+      animateCount(document.getElementById('stat3'), 17, 'M', '$');
+      animateCount(document.getElementById('stat4'), 82, 's');
+      obs.disconnect();
+    }
+  });
+}, { threshold: 0.5 });
+obs.observe(document.querySelector('.stats'));
+
+// ── START TRAINING ──
+document.getElementById('startTraining').addEventListener('click', () => {
+  document.getElementById('about').scrollIntoView({ behavior: 'smooth' });
+  showToast('Training started! Work through each section.', 'info');
+});
+
+// ── RAW HEADERS TOGGLE ──
+document.getElementById('toggleHeadersBtn').addEventListener('click', () => {
+  const box = document.getElementById('rawHeadersBox');
+  const open = box.style.display === 'none';
+  box.style.display = open ? 'block' : 'none';
+  document.getElementById('toggleHeadersBtn').innerHTML = open
+    ? '<i class="fa-solid fa-eye-slash" style="margin-right:6px"></i>Hide Headers'
+    : '<i class="fa-solid fa-code" style="margin-right:6px"></i>Inspect Raw Mail Headers';
+});
+
+// ── EMAIL LAB ──
+let emailFound = 0;
+document.querySelectorAll('.emailFlag').forEach(flag => {
+  flag.addEventListener('click', function() {
+    if(this.classList.contains('found')) return;
+    this.classList.add('found');
+    emailFound++;
+    playSound('clickSound');
+    openIocModal(this.dataset.tip);
+    document.getElementById('emailLabScore').textContent = `${emailFound} / 8 Indicators Found`;
+    if(emailFound === 8) {
+      showToast('🎯 All 8 IoCs found! Excellent analysis skills.', 'success');
+      playSound('successSound');
+    }
+  });
+});
+
+// ── IOC MODAL ──
+function openIocModal(text) {
+  document.getElementById('iocModalText').textContent = text.replace('⚠ ','');
+  document.getElementById('iocModal').classList.add('active');
+}
+['closeIocModal','closeIocModalBtn'].forEach(id => {
+  document.getElementById(id).addEventListener('click', () => document.getElementById('iocModal').classList.remove('active'));
+});
+
+// ── WEBSITE FLAGS ──
+let webFound = 0;
+document.querySelectorAll('.fakeFlag').forEach(flag => {
+  if(flag.tagName === 'BUTTON' && flag.type === 'submit') return; // submit handled by form
+  flag.addEventListener('click', function(e) {
+    if(this.classList.contains('found')) return;
+    this.classList.add('found');
+    webFound++;
+    playSound('clickSound');
+    openIocModal(this.dataset.tip);
+    document.getElementById('websiteScore').textContent = `Fake Website Indicators Found: ${webFound} / 3`;
+    if(webFound === 3) {
+      showToast('✅ All fake indicators identified!', 'success');
+      playSound('successSound');
+    }
+  });
+});
+
+// ── INTERCEPT MODAL ──
+document.getElementById('simulatorLoginForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const u = document.getElementById('simEmail').value || 'user@example.com';
+  const p = document.getElementById('simPassword').value || '••••••••';
+  document.getElementById('interceptedUser').textContent = u;
+  document.getElementById('interceptedPass').textContent = '•'.repeat(Math.min(p.length,12));
+  document.getElementById('exploitInterceptModal').classList.add('active');
+  playSound('errorSound');
+  showToast('⚠ Credential submission intercepted!', 'danger');
+});
+document.getElementById('closeInterceptBtn').addEventListener('click', () => {
+  document.getElementById('exploitInterceptModal').classList.remove('active');
+  // Mark submit button as found if not already
+  const submitBtn = document.querySelector('.loginCard.fake button[type="submit"]');
+  if(submitBtn && !submitBtn.classList.contains('found')) {
+    submitBtn.classList.add('found');
+    webFound++;
+    document.getElementById('websiteScore').textContent = `Fake Website Indicators Found: ${webFound} / 3`;
+  }
+});
+
+// ── SOCIAL CARDS ──
+const socialDefences = {
+  'Fear': 'Pause and breathe. Ask yourself: Is this email expected? Can I verify it through another channel?',
+  'Urgency': 'Real organizations rarely demand immediate action. Slow down — urgency is a manipulation signal.',
+  'Authority': 'Call the organization directly using official contact details, not numbers in the email.',
+  'Curiosity': 'Hover before you click. Ask why a stranger or company is reaching out unexpectedly.',
+  'Reward': 'If it sounds too good to be true, it is. Verify any prize claim through the official website.',
+  'Scarcity': 'Real offers don\'t disappear if you take 10 minutes to verify. Scarcity is artificial pressure.'
+};
+document.querySelectorAll('.social-card').forEach(card => {
+  card.addEventListener('click', function() {
+    const title = this.dataset.title;
+    this.classList.add('revealed');
+    document.getElementById('socialModalTitle').textContent = title;
+    document.getElementById('socialModalDesc').textContent = this.dataset.desc;
+    document.getElementById('socialModalDefence').textContent = socialDefences[title] || 'Always pause and verify before acting.';
+    document.getElementById('socialModal').classList.add('active');
+    playSound('clickSound');
+  });
+});
+document.getElementById('closeSocialModal').addEventListener('click', () => document.getElementById('socialModal').classList.remove('active'));
+
+// ── CHECKLIST ──
+let checkCount = 0;
+document.querySelectorAll('.check-item').forEach(item => {
+  item.addEventListener('click', function() {
+    const wasChecked = this.classList.contains('checked');
+    this.classList.toggle('checked');
+    this.querySelector('.check-box').innerHTML = wasChecked ? '' : '<i class="fa-solid fa-check" style="font-size:12px"></i>';
+    checkCount += wasChecked ? -1 : 1;
+    document.getElementById('checklistScore').textContent = `${checkCount} / 6 Verified`;
+    if(checkCount === 6) showToast('✅ All safety checks passed!', 'success');
+  });
+});
+
+// ── QUIZ ──
+const questions = [
+  { q: "What is the primary goal of a phishing attack?", opts: ["Install software updates","Steal sensitive information","Test network speed","Improve email delivery"], a: 1 },
+  { q: "Which of the following is a sign of a phishing email?", opts: ["Your real name in the greeting","A verified sender domain","Generic salutation like 'Dear Customer'","A reply address matching the from domain"], a: 2 },
+  { q: "What does 'spear phishing' specifically target?", opts: ["All email users","Random individuals","Specific individuals or organizations","Only mobile users"], a: 2 },
+  { q: "You receive an email claiming your account will be closed in 1 hour unless you act. This is an example of:", opts: ["A genuine security alert","Artificial urgency manipulation","Standard IT communication","Account policy enforcement"], a: 1 },
+  { q: "Which URL is most likely legitimate for a Microsoft login page?", opts: ["https://microsoft-login-security.xyz","https://login.micr0soft.com","https://login.microsoftonline.com","https://ms-secure-verify.net"], a: 2 },
+  { q: "A file named 'Invoice.pdf.exe' is attached to an email. What should you do?", opts: ["Open it — it's a PDF","Ignore the .exe extension, it's normal","Delete it — this is a double extension attack","Forward it to a colleague"], a: 2 },
+  { q: "What is 'vishing'?", opts: ["Phishing via email","Voice-based phishing over phone calls","A type of malware","Phishing via SMS"], a: 1 },
+  { q: "An SSL padlock icon on a website means:", opts: ["The site is completely safe and legitimate","The traffic is encrypted but the site may still be malicious","The site is owned by a verified company","All login data is protected from attackers"], a: 1 },
+  { q: "What is the best first step when receiving a suspicious email from your 'bank'?", opts: ["Click the provided link to verify","Reply to confirm it's legitimate","Call the bank using the official number on their website","Delete immediately without investigation"], a: 2 },
+  { q: "Multi-Factor Authentication (MFA) protects you because:", opts: ["It makes passwords longer","It requires a second factor even if credentials are stolen","It blocks all phishing emails automatically","It encrypts your hard drive"], a: 1 },
+];
+
+let qIndex = 0, score = 0;
+
+function openQuiz() {
+  qIndex = 0; score = 0;
+  document.getElementById('quizModal').classList.add('active');
+  loadQuestion();
+}
+
+function loadQuestion() {
+  const q = questions[qIndex];
+  document.getElementById('question').textContent = q.q;
+  document.getElementById('questionCounter').textContent = `Question ${qIndex+1} of ${questions.length}`;
+  document.getElementById('scoreTracker').textContent = `Score: ${score}`;
+  document.getElementById('quizProgressFill').style.width = ((qIndex+1)/questions.length*100)+'%';
+  const answers = document.getElementById('answers');
+  answers.innerHTML = '';
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = opt;
+    btn.addEventListener('click', () => selectAnswer(i));
+    answers.appendChild(btn);
+  });
+  document.getElementById('nextQuestion').classList.remove('visible');
+}
+
+function selectAnswer(i) {
+  const q = questions[qIndex];
+  const btns = document.querySelectorAll('.answer-btn');
+  btns.forEach(b => b.disabled = true);
+  btns[q.a].classList.add('correct');
+  if(i === q.a) { score++; playSound('successSound'); showToast('✅ Correct!', 'success'); }
+  else { btns[i].classList.add('wrong'); playSound('errorSound'); showToast('❌ Incorrect.', 'danger'); }
+  document.getElementById('scoreTracker').textContent = `Score: ${score}`;
+  document.getElementById('nextQuestion').classList.add('visible');
+  document.getElementById('nextQuestion').textContent = qIndex < questions.length-1 ? 'Next Question →' : 'See Results';
+}
+
+document.getElementById('nextQuestion').addEventListener('click', () => {
+  qIndex++;
+  if(qIndex < questions.length) loadQuestion();
+  else finishQuiz();
+});
+
+function finishQuiz() {
+  document.getElementById('quizModal').classList.remove('active');
+  const pct = Math.round(score/questions.length*100);
+  if(pct >= 70) {
+    const stars = pct >= 90 ? '⭐⭐⭐' : pct >= 80 ? '⭐⭐' : '⭐';
+    document.getElementById('certStars').textContent = stars;
+    document.getElementById('certScoreText').textContent = `Score: ${score}/${questions.length} (${pct}%)`;
+    document.getElementById('certificateModal').classList.add('active');
+    playSound('successSound');
+  } else {
+    document.getElementById('failText').textContent = `You scored ${score}/${questions.length} (${pct}%). The passing score is 70%. Review the training and try again.`;
+    document.getElementById('failModal').classList.add('active');
+    playSound('errorSound');
+  }
+}
+
+document.getElementById('startQuiz').addEventListener('click', openQuiz);
+document.getElementById('closeQuizModal').addEventListener('click', () => document.getElementById('quizModal').classList.remove('active'));
+document.getElementById('closeFailModal').addEventListener('click', () => document.getElementById('failModal').classList.remove('active'));
+document.getElementById('retryQuizBtn').addEventListener('click', () => {
+  document.getElementById('failModal').classList.remove('active');
+  openQuiz();
+});
+
+// ── CERTIFICATE ──
+document.getElementById('generateCertificate').addEventListener('click', () => {
+  const name = document.getElementById('username').value.trim();
+  if(!name) { showToast('Please enter your name to generate the certificate.', 'warn'); return; }
+  document.getElementById('certificateModal').classList.remove('active');
+  generateCert(name);
+});
+
+function generateCert(name) {
+  const pct = Math.round(score/questions.length*100);
+  const canvas = document.createElement('canvas');
+  canvas.width = 900; canvas.height = 640;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  const grad = ctx.createLinearGradient(0,0,900,640);
+  grad.addColorStop(0,'#0a0c10'); grad.addColorStop(1,'#111318');
+  ctx.fillStyle = grad; ctx.fillRect(0,0,900,640);
+
+  // Border glow
+  ctx.strokeStyle = '#00e5ff'; ctx.lineWidth = 2;
+  ctx.strokeRect(20,20,860,600);
+  ctx.strokeStyle = 'rgba(0,229,255,.2)'; ctx.lineWidth = 12;
+  ctx.strokeRect(26,26,848,588);
+
+  // Header badge
+  ctx.fillStyle = 'rgba(0,229,255,.08)';
+  ctx.beginPath(); ctx.arc(450,100,70,0,Math.PI*2); ctx.fill();
+  ctx.strokeStyle = 'rgba(0,229,255,.3)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(450,100,70,0,Math.PI*2); ctx.stroke();
+
+  // Shield icon (simplified)
+  ctx.fillStyle = '#00e5ff'; ctx.font = 'bold 52px Arial';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('🛡', 450, 100);
+
+  // Title
+  ctx.fillStyle = '#ffffff'; ctx.font = 'bold 14px "Arial"';
+  ctx.letterSpacing = '4px';
+  ctx.fillText('PHISHSHIELD · CERTIFICATE OF COMPLETION', 450, 195);
+
+  ctx.fillStyle = 'rgba(0,229,255,.5)';
+  ctx.fillRect(150,210,600,1);
+
+  // Subtitle
+  ctx.fillStyle = '#7a8099'; ctx.font = '13px Arial';
+  ctx.fillText('This certifies that', 450, 238);
+
+  // Name
+  ctx.fillStyle = '#ffffff'; ctx.font = 'bold 44px Georgia';
+  ctx.fillText(name, 450, 300);
+
+  // Line under name
+  ctx.fillStyle = '#00e5ff';
+  ctx.fillRect(220,318,460,2);
+
+  // Body text
+  ctx.fillStyle = '#b0b8d0'; ctx.font = '14px Arial';
+  ctx.fillText('has successfully completed the Interactive Phishing Awareness Training', 450, 360);
+  ctx.fillText('and demonstrated the ability to identify social engineering attacks.', 450, 383);
+
+  // Score badge
+  ctx.fillStyle = 'rgba(0,214,143,.1)';
+  ctx.beginPath(); ctx.roundRect(310,408,280,46,10); ctx.fill();
+  ctx.strokeStyle = 'rgba(0,214,143,.3)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.roundRect(310,408,280,46,10); ctx.stroke();
+  ctx.fillStyle = '#00d68f'; ctx.font = 'bold 16px Arial';
+  ctx.fillText(`Final Score: ${score}/${questions.length} (${pct}%)`, 450, 436);
+
+  // Date
+  ctx.fillStyle = '#7a8099'; ctx.font = '12px Arial';
+  ctx.fillText(`Issued: ${new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})}`, 450, 520);
+
+  // Footer line
+  ctx.fillStyle = 'rgba(255,255,255,.05)';
+  ctx.fillRect(50,540,800,1);
+  ctx.fillStyle = 'rgba(122,128,153,.4)'; ctx.font = '11px Arial';
+  ctx.fillText('This certificate is for educational purposes · PhishShield Awareness Platform', 450, 565);
+
+  // Download
+  const link = document.createElement('a');
+  link.download = `PhishShield_Certificate_${name.replace(/\s+/g,'_')}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+  showToast('🎓 Certificate downloaded!', 'success');
+}
+
+// ── Close modals on backdrop click ──
+document.querySelectorAll('.modal').forEach(modal => {
+  modal.addEventListener('click', (e) => {
+    if(e.target === modal) modal.classList.remove('active');
+  });
+});
+</script>
 </body>
 </html>
